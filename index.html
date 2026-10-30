@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1b1b19">
+    <meta name="description" content="Tu agenda, estudio y entrenamiento, a tu ritmo. Disponible sin conexión después de la primera visita.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Mi día">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+    <title>Mi día</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body id="app">
+    <header class="cabecera-app">
+        <button id="inicio-app" aria-label="Ir al calendario"><span class="marca-app" aria-hidden="true">m.</span><span>Mi día</span></button>
+        <span class="lema-app">Un espacio para avanzar</span>
+    </header>
+    <aside id="estado-pwa" class="estado-pwa" hidden aria-label="Estado de la aplicación">
+        <p id="mensaje-pwa" role="status" aria-live="polite"></p>
+        <button id="actualizar-pwa" type="button" hidden>Actualizar</button>
+    </aside>
+    <aside id="acceso-sesion" hidden aria-label="Sesión de estudio activa">
+        <span class="indicador-sesion" aria-hidden="true"></span>
+        <div><strong id="acceso-sesion-materia"></strong><span id="acceso-sesion-tiempo"></span></div>
+        <button id="volver-a-sesion">Ver sesión <span aria-hidden="true">↗</span></button>
+    </aside>
+
+    <section id="pantalla-semana" aria-label="Inicio">
+        <p class="antetitulo" id="fecha-hoy"></p>
+        <div class="titulo-seccion"><h2>Tu calendario</h2><span>Elige un día</span></div>
+        <div id="navegacion-dias">
+            <button id="anterior" aria-label="Día anterior">‹</button>
+            <button id="ir-hoy">Volver a hoy</button>
+            <button id="siguiente" aria-label="Día siguiente">›</button>
+        </div>
+        <div id="carrusel"></div>
+        <div class="panel-resumen panel-agenda prioridades-inicio">
+            <div class="titulo-seccion"><h2>Lo que tienes por delante</h2><button id="abrir-agenda">Ver agenda →</button></div>
+            <p id="resumen-agenda-inicio" class="ayuda-campo"></p>
+            <p id="mensaje-tareas-inicio" role="status" class="mensaje-tareas"></p>
+            <ul id="proximas-tareas" class="lista-tareas"></ul>
+        </div>
+        <div class="accesos-hoy" aria-label="Accesos para hoy">
+            <button id="estudiar-hoy" class="accion-principal">Estudiar hoy <span aria-hidden="true">↗</span></button>
+            <button id="entrenar-hoy">Entrenar hoy <span aria-hidden="true">↗</span></button>
+        </div>
+        <div class="resumen-actividad" aria-label="Lo que ya has registrado hoy">
+            <div><span>Estudio de hoy</span><strong id="estudio-hoy">Sin registrar</strong></div>
+            <div><span>Entrenamiento de hoy</span><strong id="gimnasio-hoy">Sin registrar</strong></div>
+        </div>
+        <button id="abrir-rutinas"><span><strong>Mis rutinas</strong><small>Prepara tus próximos entrenamientos</small></span><span aria-hidden="true">→</span></button>
+    </section>
+
+    <section id="pantalla-dia" hidden>
+        <button id="volver">‹ Volver al calendario</button>
+
+        <h1 id="titulo-dia"></h1>
+        <div class="resumen-actividad" aria-label="Actividad del día">
+            <div><span>Tiempo de estudio</span><strong id="estudio-dia">Sin registrar</strong></div>
+            <div><span>Entrenamiento</span><strong id="gimnasio-dia">Sin registrar</strong></div>
+        </div>
+
+        <div id="opciones-dia">
+            <button id="abrir-productividad"><span class="icono-opcion" aria-hidden="true">◷</span><span><strong>Productividad</strong><small>Encuentra tu foco, a tu ritmo.<br>Cronómetro libre y Pomodoro</small></span><span aria-hidden="true">→</span></button>
+            <button id="abrir-gimnasio"><span class="icono-opcion" aria-hidden="true">↗</span><span><strong>Gimnasio</strong><small>Todo tu entrenamiento, aquí.<br>Rutinas, series y pesos</small></span><span aria-hidden="true">→</span></button>
+        </div>
+        <div class="panel-resumen panel-agenda">
+            <div class="titulo-seccion"><h2>Tareas de este día</h2><button id="tarea-del-dia">Añadir</button></div>
+            <p id="mensaje-tareas-dia" role="status" class="mensaje-tareas"></p>
+            <ul id="tareas-dia" class="lista-tareas"></ul>
+        </div>
+    </section>
+
+    <section id="pantalla-productividad" hidden>
+        <button id="volver-al-dia">‹ Volver al día</button>
+
+        <h1>Productividad</h1>
+        <p id="fecha-productividad"></p>
+
+        <label for="materia">¿Qué vas a estudiar?</label>
+        <input
+            id="materia"
+            type="text"
+            placeholder="Ej. Álgebra"
+            list="materias-recientes"
+            maxlength="100"
+            autocomplete="off"
+            enterkeyhint="next"
+        >
+        <datalist id="materias-recientes"></datalist>
+
+        <label for="objetivo">Objetivo de la sesión <span class="opcional">Opcional</span></label>
+        <input
+            id="objetivo"
+            type="text"
+            placeholder="Ej. Resolver cinco ejercicios"
+            maxlength="300"
+            enterkeyhint="done"
+        >
+
+        <p id="etiqueta-modo" class="etiqueta-campo">¿Cómo quieres estudiar?</p>
+        <input id="modo-estudio" type="hidden" value="libre">
+        <div class="selector-modo" role="group" aria-labelledby="etiqueta-modo">
+            <button id="modo-libre" type="button" aria-pressed="true"><strong>Cronómetro</strong><small>Estudia a tu ritmo</small></button>
+            <button id="modo-pomodoro" type="button" aria-pressed="false"><strong>Pomodoro</strong><small>Alterna foco y descanso</small></button>
+        </div>
+        <fieldset id="config-pomodoro" hidden>
+            <legend>Tiempos de Pomodoro · minutos</legend>
+            <div class="tiempos-pomodoro">
+                <label><span>Estudio</span><input id="min-estudio" type="number" inputmode="numeric" min="1" max="180" value="25" step="1"></label>
+                <label><span>Descanso corto</span><input id="min-corto" type="number" inputmode="numeric" min="1" max="180" value="5" step="1"></label>
+                <label><span>Descanso largo</span><input id="min-largo" type="number" inputmode="numeric" min="1" max="180" value="15" step="1"></label>
+            </div>
+            <p>Descanso largo cada 4 bloques completos. Cada fase empieza cuando tú decides.</p>
+        </fieldset>
+        <div id="panel-temporizador" data-fase="libre">
+        <div id="nivel-pomodoro" aria-hidden="true"></div>
+        <button id="alternar-foco-pomodoro" type="button" hidden>Minimizar</button>
+        <p id="estado-temporizador" role="status" aria-live="polite">Cronómetro libre · Listo</p>
+        <p id="cronometro" aria-label="Tiempo del temporizador">00:00:00</p>
+        <p id="progreso-pomodoro"></p>
+        <progress id="avance-pomodoro" max="1" value="0" aria-label="Progreso de la fase" hidden></progress>
+
+        <div class="controles-temporizador">
+        <button id="empezar-estudio">Empezar a estudiar</button>
+        <button id="pausar-estudio" disabled>Pausar</button>
+
+        <button id="terminar-estudio" disabled>
+            Terminar y registrar
+        </button>
+        </div>
+
+        <p id="sesion-activa"></p>
+        <p id="aviso-estudio" role="status" aria-live="polite"></p>
+        </div>
+        <p class="nota-temporizador">La sesión sigue vinculada al día en que empezó. Mantén la página abierta para ver los avisos; con el móvil bloqueado pueden retrasarse.</p>
+
+        <h2>Sesiones de este día</h2>
+        <p id="total-estudio"></p>
+        <ul id="lista-sesiones"></ul>
+
+    </section>    
+
+    <section id="pantalla-gimnasio" hidden>
+        <button id="volver-del-gimnasio">‹ Volver al día</button>
+
+        <h1>Gimnasio</h1>
+        <p id="fecha-gimnasio"></p>
+
+        <label for="rutina-del-dia">¿Qué rutina has hecho?</label>
+
+        <select id="rutina-del-dia">
+            <option value="">Selecciona una rutina</option>
+        </select>
+
+        <p id="mensaje-rutina-dia" role="status"></p>
+        <button id="gestionar-rutinas-gimnasio" class="boton-discreto">Gestionar mis rutinas →</button>
+        <p class="ayuda-campo">Las series se guardan al salir de cada campo.</p>
+
+        <h2>Ejercicios</h2>
+        <div id="lista-ejercicios"></div>
+
+    </section>
+
+    <section id="pantalla-rutinas" hidden>
+        <button id="volver-de-rutinas">‹ Volver al calendario</button>
+
+        <h1>Mis rutinas</h1>
+        <p>Añade las rutinas que quieras utilizar en tus entrenamientos.</p>
+
+        <label for="nueva-rutina">Nombre de la rutina</label>
+        <input
+            id="nueva-rutina"
+            type="text"
+            maxlength="100"
+            placeholder="Ej. Pecho, hombro y tríceps"
+        >
+
+        <button id="guardar-rutina">Añadir rutina</button>
+
+        <ul id="lista-rutinas"></ul>
+        <p id="mensaje-rutinas" role="status"></p>
+
+        <h2>Ejercicios de una rutina</h2>
+
+        <label for="rutina-a-editar">Selecciona la rutina</label>
+        <select id="rutina-a-editar"></select>
+
+        <label for="nuevo-ejercicio">Nombre del ejercicio</label>
+        <input
+            id="nuevo-ejercicio"
+            type="text"
+            maxlength="100"
+            placeholder="Ej. Press banca"
+        >
+
+        <button id="guardar-ejercicio">Añadir ejercicio</button>
+
+        <ul id="ejercicios-rutina"></ul>
+        <p id="mensaje-ejercicios" role="status"></p>
+    </section>
+    <section id="pantalla-resumen-gimnasio" hidden>
+        <p class="antetitulo">TU ENTRENAMIENTO</p>
+        <h1>Gimnasio</h1>
+        <p class="intro-resumen">Una vista de tu constancia, serie a serie.</p>
+        <div class="acciones-resumen"><button id="registrar-gimnasio" class="accion-principal">Registrar entrenamiento de hoy ↗</button><button id="rutinas-resumen">Mis rutinas</button></div>
+        <div class="selector-periodo" role="group" aria-label="Periodo del resumen de gimnasio">
+            <button id="gym-semana" aria-pressed="true">Semana</button><button id="gym-mes" aria-pressed="false">Mes</button>
+        </div>
+        <div class="navegacion-periodo"><button id="gym-anterior" aria-label="Periodo anterior de gimnasio">‹</button><h2 id="gym-periodo" aria-live="polite"></h2><button id="gym-siguiente" aria-label="Periodo siguiente de gimnasio">›</button></div>
+        <button id="gym-actual" class="volver-periodo" hidden>Volver al periodo actual</button>
+        <div id="gym-metricas" class="metricas-resumen"></div>
+        <div class="panel-resumen"><h2>Tu actividad</h2><p class="ayuda-campo">Series completas por día. Toca un día para abrirlo.</p><div class="cabecera-calendario" aria-hidden="true"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div id="gym-calendario" class="calendario-actividad" role="group" aria-label="Entrenamientos del periodo"></div><p id="gym-vacio" class="vacio-resumen"></p></div>
+        <div class="panel-resumen"><h2>Rutinas del periodo</h2><ul id="gym-detalle" class="lista-desglose"></ul></div>
+    </section>
+
+    <section id="pantalla-resumen-productividad" hidden>
+        <p class="antetitulo">TU TIEMPO DE ESTUDIO</p>
+        <h1>Productividad</h1>
+        <p class="intro-resumen">Cada rato de estudio cuenta.</p>
+        <div class="acciones-resumen"><button id="registrar-productividad" class="accion-principal">Estudiar con cronómetro ↗</button><button id="pomodoro-resumen">Abrir Pomodoro</button></div>
+        <button id="agenda-productividad" class="acceso-agenda">Organizar tareas y exámenes →</button>
+        <div class="selector-periodo" role="group" aria-label="Periodo del resumen de productividad">
+            <button id="prod-semana" aria-pressed="true">Semana</button><button id="prod-mes" aria-pressed="false">Mes</button>
+        </div>
+        <div class="navegacion-periodo"><button id="prod-anterior" aria-label="Periodo anterior de productividad">‹</button><h2 id="prod-periodo" aria-live="polite"></h2><button id="prod-siguiente" aria-label="Periodo siguiente de productividad">›</button></div>
+        <button id="prod-actual" class="volver-periodo" hidden>Volver al periodo actual</button>
+        <div id="prod-metricas" class="metricas-resumen"></div>
+        <p id="prod-modos" class="ayuda-campo"></p>
+        <div class="panel-resumen"><h2>Tu actividad</h2><p class="ayuda-campo">Tiempo registrado por día, sin pausas ni descansos. Toca un día para abrirlo.</p><div class="cabecera-calendario" aria-hidden="true"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div id="prod-calendario" class="calendario-actividad" role="group" aria-label="Estudio del periodo"></div><p id="prod-vacio" class="vacio-resumen"></p></div>
+        <div class="panel-resumen"><h2>Tiempo por materia</h2><ul id="prod-detalle" class="lista-desglose"></ul></div>
+    </section>
+    <section id="pantalla-resumen-agenda" hidden>
+        <div class="cabecera-agenda"><h1>Agenda</h1><button id="nueva-tarea-resumen" type="button" aria-label="Añadir una tarea, examen o recordatorio" title="Añadir a la agenda">+</button></div>
+        <div class="navegacion-periodo"><button id="agenda-anterior" aria-label="Periodo anterior de agenda">‹</button><h2 id="agenda-periodo" aria-live="polite"></h2><button id="agenda-siguiente" aria-label="Periodo siguiente de agenda">›</button></div>
+        <div class="panel-resumen calendario-agenda"><div class="cabecera-calendario" aria-hidden="true"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div id="agenda-calendario" class="calendario-actividad" role="group" aria-label="Agenda del periodo"></div><p class="ayuda-campo">Toca un día para ver o añadir tareas. El verde indica que todo está terminado.</p></div>
+        <div class="selector-periodo" role="group" aria-label="Periodo de la agenda"><button id="agenda-semana" aria-pressed="true">Semana</button><button id="agenda-mes" aria-pressed="false">Mes</button></div>
+        <button id="agenda-actual" class="volver-periodo" hidden>Volver al periodo actual</button>
+        <div id="agenda-metricas" class="metricas-resumen"></div>
+        <p id="agenda-examenes" class="ayuda-campo"></p>
+        <div class="panel-resumen"><div class="titulo-seccion"><h2>Tareas y exámenes del periodo</h2><button id="todas-tareas-resumen">Ver todas</button></div><p id="mensaje-tareas-resumen" role="status" class="mensaje-tareas"></p><ul id="agenda-periodo-tareas" class="lista-tareas"></ul></div>
+    </section>
+    <section id="pantalla-agenda" hidden>
+        <button id="volver-agenda" class="boton-volver">‹ Volver al inicio</button>
+        <p class="antetitulo">UN POCO MÁS DE ORDEN</p>
+        <h1>Tareas y exámenes</h1>
+        <p class="intro-resumen">Apunta lo que viene y marca lo que ya has hecho.</p>
+        <form id="formulario-tarea" class="panel-resumen" novalidate>
+            <h2 id="titulo-formulario-tarea">Añadir a tu agenda</h2>
+            <label for="titulo-tarea">¿Qué tienes pendiente?</label>
+            <input id="titulo-tarea" type="text" maxlength="160" required placeholder="Ej. Repasar el tema 3" enterkeyhint="next">
+            <div class="campos-agenda">
+                <div><label for="tipo-tarea">Tipo</label><select id="tipo-tarea"><option value="tarea">Tarea</option><option value="examen">Examen</option><option value="recordatorio">Recordatorio</option></select></div>
+                <div><label for="fecha-tarea">Fecha</label><input id="fecha-tarea" type="date" required></div>
+            </div>
+            <label for="notas-tarea">Detalles <span class="opcional">Opcional</span></label>
+            <textarea id="notas-tarea" rows="2" maxlength="600" placeholder="Materia, temas o lo que necesites recordar"></textarea>
+            <div class="acciones-formulario"><button id="guardar-tarea" type="submit" class="accion-principal">Añadir</button><button id="cancelar-edicion-tarea" type="button" hidden>Cancelar edición</button></div>
+        </form>
+        <p id="mensaje-agenda" role="status" aria-live="polite"></p>
+        <div class="selector-estado-tareas" role="group" aria-label="Filtrar tareas">
+            <button id="tareas-pendientes" aria-pressed="true">Pendientes</button><button id="tareas-terminadas" aria-pressed="false">Terminadas</button><button id="tareas-todas" aria-pressed="false">Todas</button>
+        </div>
+        <div class="filtro-fecha-agenda"><label for="filtro-fecha-tarea">Consultar una fecha</label><input id="filtro-fecha-tarea" type="date"><button id="todas-fechas-tareas">Todas las fechas</button></div>
+        <p id="contador-tareas" class="ayuda-campo"></p>
+        <ul id="lista-tareas" class="lista-tareas"></ul>
+    </section>
+    <footer class="pie-app">A tu ritmo, cada día. <span>Tus datos se guardan en este navegador.</span></footer>
+    <nav id="barra-inferior" class="barra-inferior" aria-label="Navegación principal" aria-describedby="ayuda-barra">
+        <button id="nav-gimnasio" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(-35 12 12)"><path d="M8 12h8M3 10v4m18-4v4"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/></g></svg><span>Gimnasio</span></button>
+        <button id="nav-agenda" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 10h16m-12 5 2 2 5-4"/></svg><span>Agenda</span></button>
+        <button id="nav-inicio" type="button" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H7V10m2 10v-7h6v7"/></svg><span>Inicio</span></button>
+        <button id="nav-productividad" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16M6 16v-4m6 4V7m6 9V3"/></svg><span>Productividad</span></button>
+        <button id="nav-pomodoro" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="7"/><path d="M12 10v4l2 2M9 3h6m-3 0v4m6 1 2-2"/></svg><span>Pomodoro</span></button>
+    </nav>
+    <p id="ayuda-barra" class="solo-lectores">Puedes tocar una sección. En móvil, desliza sobre esta barra a la derecha para abrir la sección de la derecha o a la izquierda para abrir la de la izquierda.</p>
+
+    <script src="tareas.js"></script>
+    <script src="app.js"></script>
+    <script src="resumenes.js"></script>
+    <script src="interfaz.js"></script>
+    <script src="pwa.js"></script>
+</body>
+</html>
