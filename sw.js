@@ -1,13 +1,14 @@
 // Ejecuta tools/preparar-publicacion.cjs antes de publicar: renueva VERSION
 // a partir del contenido de todos los archivos públicos, sin dependencias.
-const VERSION = '0d7098a83c469435';
+const VERSION = '30514d6760327cb0';
 const PREFIX = 'mi-dia:' + self.registration.scope + ':';
 const CACHE_NAME = PREFIX + VERSION;
 const FILES = [
     './', './index.html', './estilos.css', './tareas.js', './app.js',
     './resumenes.js', './interfaz.js', './pwa.js', './manifest.webmanifest',
     './icons/icon-192.png', './icons/icon-512.png',
-    './icons/maskable-512.png', './icons/apple-touch-icon.png'
+    './icons/maskable-512.png', './icons/apple-touch-icon.png',
+    './config-sync.js', './datos-locales.js', './sync-core.js', './nube-api.js', './cuenta.js'
 ];
 const URLS = new Set(FILES.map(file => new URL(file, self.registration.scope).href));
 

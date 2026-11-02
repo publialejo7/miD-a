@@ -439,6 +439,7 @@
 
         // Un solo documento guarda historial y temporizador de forma atómica.
         const $estudio = id => document.getElementById(id);
+        const almacenamientoApp = typeof DatosMiDia !== 'undefined' ? DatosMiDia.almacenamiento : localStorage;
         const campoMateria = $estudio('materia');
         const campoObjetivo = $estudio('objetivo');
         const modoEstudio = $estudio('modo-estudio');
@@ -452,7 +453,7 @@
         let configuracion = [25, 5, 15];
         let almacenamientoDisponible = true;
         try {
-            const guardado = localStorage.getItem(claveProductividad);
+            const guardado = almacenamientoApp.getItem(claveProductividad);
             if (guardado !== null) {
                 const datos = JSON.parse(guardado);
                 if (datos.version !== 1 || !Array.isArray(datos.sesiones)) throw new Error('Formato desconocido');
@@ -472,7 +473,7 @@
                 sesionActiva = datos.activa;
                 configuracion = datos.configuracion;
             } else {
-                const anteriores = JSON.parse(localStorage.getItem('miDiaSesiones') || '[]');
+                const anteriores = JSON.parse(almacenamientoApp.getItem('miDiaSesiones') || '[]');
                 if (!Array.isArray(anteriores)) throw new Error('Historial no válido');
                 sesiones = anteriores;
             }
@@ -493,7 +494,7 @@
         function guardarSesiones() {
             if (!almacenamientoDisponible) return false;
             try {
-                localStorage.setItem(claveProductividad, JSON.stringify({version: 1, sesiones, activa: sesionActiva, configuracion}));
+                almacenamientoApp.setItem(claveProductividad, JSON.stringify({version: 1, sesiones, activa: sesionActiva, configuracion}));
                 return true;
             } catch (error) {
                 $estudio('aviso-estudio').textContent = 'No se pudo guardar. Mantén esta página abierta y libera espacio o permite el almacenamiento. Vuelve a pulsar el control para reintentar.';
@@ -782,7 +783,7 @@
 
         // Recuperamos los datos al abrir la página.
         try {
-            const guardado = localStorage.getItem("miDiaGimnasio");
+            const guardado = almacenamientoApp.getItem("miDiaGimnasio");
 
             if (guardado !== null) {
                 const datos = JSON.parse(guardado);
@@ -824,7 +825,7 @@
 
         function guardarDatosGimnasio() {
             try {
-                localStorage.setItem(
+                almacenamientoApp.setItem(
                     "miDiaGimnasio",
                     JSON.stringify(datosGimnasio)
                 );

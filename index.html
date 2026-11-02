@@ -18,7 +18,7 @@
 <body id="app">
     <header class="cabecera-app">
         <button id="inicio-app" aria-label="Ir al calendario"><span class="marca-app" aria-hidden="true">m.</span><span>Mi día</span></button>
-        <span class="lema-app">Un espacio para avanzar</span>
+        <button id="abrir-cuenta" type="button" class="acceso-cuenta"><span id="etiqueta-cuenta">Mi cuenta</span><small id="estado-sincronizacion">Solo en este dispositivo</small></button>
     </header>
     <aside id="estado-pwa" class="estado-pwa" hidden aria-label="Estado de la aplicación">
         <p id="mensaje-pwa" role="status" aria-live="polite"></p>
@@ -280,10 +280,50 @@
     </nav>
     <p id="ayuda-barra" class="solo-lectores">Puedes tocar una sección. En móvil, desliza sobre esta barra a la derecha para abrir la sección de la derecha o a la izquierda para abrir la de la izquierda.</p>
 
+    <dialog id="dialog-cuenta" class="dialog-cuenta" aria-labelledby="titulo-cuenta">
+        <div class="cabecera-cuenta"><h2 id="titulo-cuenta">Mi cuenta</h2><button id="cerrar-cuenta" type="button" aria-label="Cerrar cuenta">×</button></div>
+        <p id="mensaje-cuenta" role="status" aria-live="polite"></p>
+        <div id="acceso-nube">
+            <p>Usa la misma cuenta en el ordenador y el móvil para compartir tus registros.</p>
+            <form id="form-cuenta" novalidate>
+                <label for="correo-cuenta">Correo electrónico</label><input id="correo-cuenta" type="email" autocomplete="email" required maxlength="254">
+                <label for="password-cuenta">Contraseña</label><input id="password-cuenta" type="password" autocomplete="current-password" required maxlength="200">
+                <div class="acciones-cuenta"><button id="entrar-cuenta" type="submit">Entrar</button><button id="registrar-cuenta" type="button">Crear cuenta</button></div>
+                <button id="recuperar-cuenta" type="button" class="secundario-cuenta">He olvidado mi contraseña</button>
+            </form>
+        </div>
+        <div id="cuenta-conectada" hidden>
+            <p id="correo-conectado"></p>
+            <div id="importar-dispositivo" hidden>
+                <p>Antes de sincronizar, elige qué hacer con los registros locales de este navegador. La copia local original se conserva por separado.</p>
+                <button id="importar-local" type="button">Añadir los registros de este navegador a mi cuenta</button>
+                <button id="solo-nube" type="button">Usar solo los datos de mi cuenta</button>
+            </div>
+            <div id="conflictos-nube" hidden>
+                <p>El mismo registro ha cambiado de forma distinta en dos dispositivos. Elige la versión de los registros en conflicto; el resto se combina automáticamente.</p>
+                <ul id="lista-conflictos"></ul>
+                <button id="resolver-local" type="button">Conservar mi versión de los conflictos</button>
+                <button id="resolver-remoto" type="button">Conservar la versión de la nube</button>
+            </div>
+            <button id="sincronizar-ahora" type="button">Sincronizar ahora</button>
+            <p class="nota-cuenta">Puedes registrar actividad sin conexión. Los cambios se enviarán al recuperar internet. El temporizador activo permanece en el dispositivo donde lo empezaste.</p>
+            <button id="salir-cuenta" type="button" class="secundario-cuenta">Cerrar sesión en este dispositivo</button>
+        </div>
+        <form id="form-recuperacion" hidden novalidate>
+            <label for="nueva-password">Nueva contraseña (mínimo 8 caracteres)</label><input id="nueva-password" type="password" autocomplete="new-password" minlength="8" maxlength="200">
+            <button id="guardar-password" type="submit">Guardar contraseña</button>
+        </form>
+    </dialog>
+
+    <script src="config-sync.js"></script>
+    <script src="datos-locales.js"></script>
     <script src="tareas.js"></script>
     <script src="app.js"></script>
     <script src="resumenes.js"></script>
     <script src="interfaz.js"></script>
     <script src="pwa.js"></script>
+    <script src="sync-core.js"></script>
+    <script src="nube-api.js"></script>
+    <script src="cuenta.js"></script>
 </body>
 </html>

@@ -83,7 +83,7 @@ const TareasMiDia = (() => {
     return {Agenda, fechaValida, CLAVE};
 })();
 const agendaMiDia = (() => {
-    try { return typeof localStorage !== 'undefined' ? new TareasMiDia.Agenda(localStorage) : null; }
+    try { return typeof DatosMiDia !== 'undefined' ? new TareasMiDia.Agenda(DatosMiDia.almacenamiento) : typeof localStorage !== 'undefined' ? new TareasMiDia.Agenda(localStorage) : null; }
     catch (error) {
         return new TareasMiDia.Agenda({getItem() {throw error;}});
     }
