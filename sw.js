@@ -1,6 +1,6 @@
 // Ejecuta tools/preparar-publicacion.cjs antes de publicar: renueva VERSION
 // a partir del contenido de todos los archivos públicos, sin dependencias.
-const VERSION = '30514d6760327cb0';
+const VERSION = 'd0091a16bcbd1fe0';
 const PREFIX = 'mi-dia:' + self.registration.scope + ':';
 const CACHE_NAME = PREFIX + VERSION;
 const FILES = [

@@ -1,6 +1,8 @@
 const NubeMiDia = (() => {
     class API {
-        constructor(config, storage = localStorage, peticion = fetch) {
+        constructor(config, storage = localStorage, peticion = (...args) => globalThis.fetch(...args)) {
+            // Safari exige llamar al fetch nativo con Window como receptor.
+            // No se guarda directamente como método del cliente de la API.
             this.config=config;this.storage=storage;this.peticion=peticion;this.refreshPromise=null;
             this.url=(config.url || '').replace(/\/$/,'');
         }
