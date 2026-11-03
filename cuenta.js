@@ -10,19 +10,20 @@
         if (estado) $('estado-sincronizacion').textContent = estado;
     }
     function editando() {
-        return !!document.activeElement?.matches('input, textarea, select, [contenteditable]') || punteroActivo !== null;
+        return falloGuardadoGimnasio || !!document.activeElement?.matches('input, textarea, select, [contenteditable]') || punteroActivo !== null;
     }
     function refrescarDatos() {
         const docs = DatosMiDia.leer().datos;
         const productividad = JSON.parse(docs.miDiaProductividadV1 || '{"sesiones":[]}');
         sesiones = productividad.sesiones;
-        if (docs.miDiaGimnasio) datosGimnasio = JSON.parse(docs.miDiaGimnasio);
+        const gimnasioCambio=!!docs.miDiaGimnasio && docs.miDiaGimnasio!==ultimoGimnasioGuardado;
+        if (gimnasioCambio) {datosGimnasio = JSON.parse(docs.miDiaGimnasio);ultimoGimnasioGuardado = docs.miDiaGimnasio;falloGuardadoGimnasio = false;}
         const nuevaAgenda = new TareasMiDia.Agenda(DatosMiDia.almacenamiento);
         if (nuevaAgenda.errorLectura) throw new Error(nuevaAgenda.errorLectura);
         agendaMiDia._tareas = nuevaAgenda._tareas;
         mostrarCarrusel();
         if (!pantallaProductividad.hidden) mostrarSesiones();
-        if (!pantallaGimnasio.hidden) cargarRutinaDelDia();
+        if (gimnasioCambio && !pantallaGimnasio.hidden) cargarRutinaDelDia();
         if (!pantallaRutinas.hidden) mostrarRutinas();
     }
     const motor = new SyncMiDia.Motor({

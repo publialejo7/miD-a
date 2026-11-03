@@ -49,6 +49,7 @@ const ResumenesMiDia = (() => {
             let completas = 0;
             for (const ejercicio of entrenamiento.ejercicios || []) {
                 const validas = (ejercicio.series || []).filter(serie =>
+                    serie.completada !== false &&
                     String(serie.repeticiones ?? '').trim() !== '' && String(serie.peso ?? '').trim() !== '' &&
                     Number.isInteger(Number(serie.repeticiones)) && Number(serie.repeticiones) > 0 &&
                     Number.isFinite(Number(serie.peso)) && Number(serie.peso) >= 0);

@@ -23,7 +23,17 @@ const SyncMiDia = (() => {
                 if (grupo === 'study' && (!fechaValida(valor.fecha) || typeof valor.materia !== 'string' || !Number.isFinite(valor.duracion) || valor.duracion < 0 || (valor.id && valor.id!==id))) throw new Error('Sesión de estudio no válida.');
                 if (grupo === 'tasks' && (valor.id!==id || typeof valor.titulo !== 'string' || !valor.titulo.trim() || valor.titulo.length>160 || !fechaValida(valor.fecha) || !['tarea','examen','recordatorio'].includes(valor.tipo) || typeof valor.terminada !== 'boolean' || !Number.isFinite(valor.creada) || typeof valor.notas!=='string' || valor.notas.length>600)) throw new Error('Tarea de la nube no válida.');
                 if (grupo === 'routines' && (valor.nombre!==id || !valor.nombre || !Array.isArray(valor.ejercicios) || !valor.ejercicios.every(e => typeof e === 'string'))) throw new Error('Rutina de la nube no válida.');
-                if (grupo === 'workouts' && (!fechaValida(id) || typeof valor.rutina !== 'string' || (valor.entrenamiento !== null && (!valor.entrenamiento || typeof valor.entrenamiento.rutina!=='string' || !Array.isArray(valor.entrenamiento.ejercicios) || !valor.entrenamiento.ejercicios.every(e => typeof e.nombre === 'string' && Array.isArray(e.series) && e.series.every(s => s && ['string','number'].includes(typeof s.repeticiones) && ['string','number'].includes(typeof s.peso))))))) throw new Error('Entrenamiento de la nube no válido.');
+                if (grupo === 'workouts' && id === '@active') {
+                    const a=valor.entrenamiento;
+                    const segundos=v=>Number.isInteger(v) && v>=0 && v<=3600;
+                    if (!a || typeof a.id!=='string' || !a.id || !fechaValida(a.fecha) ||
+                        !(a.inicio===null || (Number.isFinite(a.inicio) && a.inicio>=0)) ||
+                        typeof a.autoDescanso!=='boolean' || typeof a.sonido!=='boolean' || !segundos(a.descansoPredeterminado) ||
+                        !(a.descanso===null || (a.descanso && Number.isFinite(a.descanso.fin) && typeof a.descanso.avisado==='boolean')) ||
+                        !Array.isArray(a.ejercicios) || !a.ejercicios.every(e=>typeof e.nombre==='string' && typeof e.variante==='string' && segundos(e.descanso) && Array.isArray(e.series) && e.series.every(s=>typeof s.completada==='boolean')))
+                        throw new Error('El entrenamiento abierto de la nube no es válido.');
+                }
+                if (grupo === 'workouts' && ((id !== '@active' && !fechaValida(id)) || (id === '@active' && (!valor.entrenamiento || !fechaValida(valor.entrenamiento.fecha) || typeof valor.entrenamiento.id !== 'string')) || typeof valor.rutina !== 'string' || (valor.entrenamiento !== null && (!valor.entrenamiento || typeof valor.entrenamiento.rutina!=='string' || !Array.isArray(valor.entrenamiento.ejercicios) || !valor.entrenamiento.ejercicios.every(e => typeof e.nombre === 'string' && Array.isArray(e.series) && e.series.every(s => s && ['string','number'].includes(typeof s.repeticiones) && ['string','number'].includes(typeof s.peso))))))) throw new Error('Entrenamiento de la nube no válido.');
             }
         }
         return datos;
@@ -63,6 +73,7 @@ const SyncMiDia = (() => {
         resultado.routines = Object.fromEntries([...nombres].map(nombre => [nombre, {nombre, ejercicios: gym.ejerciciosPorRutina?.['rutina:' + nombre] || []}]));
         const fechas = new Set([...Object.keys(gym.porDia || {}), ...Object.keys(gym.entrenamientos || {})]);
         resultado.workouts = Object.fromEntries([...fechas].map(fecha => [fecha, {rutina: gym.porDia?.[fecha] || gym.entrenamientos?.[fecha]?.rutina || '', entrenamiento: gym.entrenamientos?.[fecha] || null}]));
+        if (gym.activo) resultado.workouts['@active'] = {rutina:gym.activo.rutina,entrenamiento:gym.activo};
         return validar(resultado);
     }
     function aDocumentos(datos, anteriores) {
@@ -73,9 +84,9 @@ const SyncMiDia = (() => {
         return {...anteriores,
             miDiaProductividadV1: JSON.stringify(estudio),
             miDiaTareasV1: JSON.stringify({version:1, tareas:Object.values(datos.tasks)}),
-            miDiaGimnasio: JSON.stringify({rutinas:rutinas.map(r => r.nombre), ejerciciosPorRutina:Object.fromEntries(rutinas.map(r => ['rutina:' + r.nombre, r.ejercicios])),
-                porDia:Object.fromEntries(Object.entries(datos.workouts).map(([fecha, w]) => [fecha, w.rutina])),
-                entrenamientos:Object.fromEntries(Object.entries(datos.workouts).filter(([,w]) => w.entrenamiento).map(([fecha,w]) => [fecha,w.entrenamiento]))})
+            miDiaGimnasio: JSON.stringify({...(datos.workouts['@active'] ? {activo:datos.workouts['@active'].entrenamiento} : {}),rutinas:rutinas.map(r => r.nombre), ejerciciosPorRutina:Object.fromEntries(rutinas.map(r => ['rutina:' + r.nombre, r.ejercicios])),
+                porDia:Object.fromEntries(Object.entries(datos.workouts).filter(([fecha]) => fecha !== '@active').map(([fecha, w]) => [fecha, w.rutina])),
+                entrenamientos:Object.fromEntries(Object.entries(datos.workouts).filter(([fecha,w]) => fecha !== '@active' && w.entrenamiento).map(([fecha,w]) => [fecha,w.entrenamiento]))})
         };
     }
     class Motor {

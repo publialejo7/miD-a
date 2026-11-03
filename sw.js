@@ -1,9 +1,10 @@
 // Ejecuta tools/preparar-publicacion.cjs antes de publicar: renueva VERSION
 // a partir del contenido de todos los archivos públicos, sin dependencias.
-const VERSION = 'd0091a16bcbd1fe0';
+const VERSION = 'b7eb8f7c73a0e455';
 const PREFIX = 'mi-dia:' + self.registration.scope + ':';
 const CACHE_NAME = PREFIX + VERSION;
 const FILES = [
+    './gimnasio-core.js', './gimnasio-vista.js',
     './', './index.html', './estilos.css', './tareas.js', './app.js',
     './resumenes.js', './interfaz.js', './pwa.js', './manifest.webmanifest',
     './icons/icon-192.png', './icons/icon-512.png',

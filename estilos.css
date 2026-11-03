@@ -850,3 +850,31 @@ body[data-foco="true"] #panel-temporizador #aviso-estudio { padding: 0; margin: 
 #importar-dispositivo, #conflictos-nube { border: 1px solid #665477; padding: 12px; border-radius: 12px; margin: 16px 0; }
 #importar-dispositivo button, #conflictos-nube button { display: block; width: 100%; margin-top: 10px; }
 .nota-cuenta { color: #b8b0bd; }
+/* Entrenamiento: controles amplios, confirmación explícita y descanso sin bloquear. */
+#gym-continuar {grid-column:1/-1; width:100%; border:1px solid #bfa9e7; background:#342b44; margin-bottom:8px;}
+.gym-acciones {display:flex; flex-wrap:wrap; gap:10px; margin:16px 0;}
+.gym-acciones button {flex:1; min-height:48px;}
+.gym-cabecera {position:sticky; top:0; z-index:2; background:rgba(29,29,26,.96); padding:10px 0; backdrop-filter:blur(14px);}
+.gym-cabecera h2 {font-size:1.15rem; margin:4px 0;}
+.gym-cabecera p {margin:4px 0; color:#d4c1f2;}
+.gym-ajustes, .gym-nuevo {border:1px solid #46433e; border-radius:16px; padding:16px; margin:16px 0;}
+.gym-ajustes summary {cursor:pointer; min-height:40px;}
+.gym-ajustes label {display:block; margin:12px 0;}
+.gym-ajustes input[type=checkbox] {width:22px; height:22px; vertical-align:middle; margin-right:8px;}
+.gym-nuevo input {width:100%; box-sizing:border-box; margin-bottom:12px;}
+.gym-descanso {display:flex; flex-wrap:wrap; gap:8px; align-items:center; background:#30283d; border:1px solid #aa92cf; border-radius:14px; padding:12px; margin:12px 0;}
+.gym-descanso strong {font-size:1.4rem; margin-right:auto; font-variant-numeric:tabular-nums;}
+.gym-serie {display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:14px; margin:12px 0; border:1px dashed #79736b; border-radius:12px;}
+.gym-serie > strong, .gym-referencia {grid-column:1/-1;}
+.gym-serie label {min-width:0; font-size:.8rem;}
+.gym-serie input {width:100%; box-sizing:border-box; min-height:48px; font-size:1.15rem; margin-top:6px;}
+.gym-serie.realizada {border-style:solid; border-color:#75aa92; background:rgba(81,145,111,.10);}
+.gym-serie .gym-completar {min-height:48px; font-size:.9rem;}
+.gym-serie button {min-width:0; white-space:normal;}
+.gym-referencia {color:#c3b6d6;}
+.gym-ejercicio > label {display:block; max-width:230px; font-size:.85rem;}
+.gym-ejercicio > label input {width:100%; box-sizing:border-box; min-height:44px;}
+#gym-resumen-final {border:1px solid #75aa92; border-radius:14px; padding:18px; line-height:1.7;}
+@media(min-width:700px){.gym-serie{grid-template-columns:1fr 1fr 1fr 1fr;}.gym-serie > strong,.gym-referencia{grid-column:span 2;}}
+.gym-ejercicio h3 {position:sticky; top:90px; z-index:1; background:#222220; padding:10px 0;}
+.gym-error {grid-column:1/-1; color:#ffd4bd; font-size:.9rem; margin:4px 0;}

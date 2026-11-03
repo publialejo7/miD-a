@@ -47,7 +47,7 @@
         </div>
         <div class="accesos-hoy" aria-label="Accesos para hoy">
             <button id="estudiar-hoy" class="accion-principal">Estudiar hoy <span aria-hidden="true">↗</span></button>
-            <button id="entrenar-hoy">Entrenar hoy <span aria-hidden="true">↗</span></button>
+            <button id="gym-continuar" hidden></button><button id="entrenar-hoy">Entrenar hoy <span aria-hidden="true">↗</span></button>
         </div>
         <div class="resumen-actividad" aria-label="Lo que ya has registrado hoy">
             <div><span>Estudio de hoy</span><strong id="estudio-hoy">Sin registrar</strong></div>
@@ -152,18 +152,33 @@
         <h1>Gimnasio</h1>
         <p id="fecha-gimnasio"></p>
 
-        <label for="rutina-del-dia">¿Qué rutina has hecho?</label>
+        <div id="gym-inicio"><label for="rutina-del-dia">Empezar desde una rutina</label>
 
         <select id="rutina-del-dia">
             <option value="">Selecciona una rutina</option>
         </select>
 
-        <p id="mensaje-rutina-dia" role="status"></p>
+        <div class="gym-acciones"><button id="gym-empezar">Empezar rutina</button><button id="gym-entrenamiento-vacio">Entrenamiento vacío</button></div></div>
+        <p id="mensaje-rutina-dia" role="status" aria-live="polite"></p>
+        <button id="gym-reintentar" class="boton-discreto" hidden>Volver a guardar</button>
         <button id="gestionar-rutinas-gimnasio" class="boton-discreto">Gestionar mis rutinas →</button>
-        <p class="ayuda-campo">Las series se guardan al salir de cada campo.</p>
-
-        <h2>Ejercicios</h2>
-        <div id="lista-ejercicios"></div>
+        <div id="gym-sesion" hidden>
+            <div class="gym-cabecera"><h2 id="gym-sesion-nombre"></h2><p id="gym-tiempo"></p></div>
+            <p id="gym-fecha-aviso" class="ayuda-campo"></p>
+            <details class="gym-ajustes"><summary>Descanso y sonido</summary>
+                <label><input type="checkbox" id="gym-auto-descanso"> Iniciar descanso al completar una serie</label>
+                <label for="gym-descanso-default">Descanso predeterminado para nuevos ejercicios (segundos)</label><input id="gym-descanso-default" type="number" min="0" max="3600" step="1" inputmode="numeric" value="90">
+                <label><input type="checkbox" id="gym-sonido"> Sonido al terminar el descanso</label>
+                <p class="ayuda-campo">Completar otra serie reinicia el descanso. El sonido depende del navegador y puede no escucharse con el móvil bloqueado.</p>
+            </details>
+            <div id="gym-descanso-panel" class="gym-descanso" hidden><strong id="gym-descanso-tiempo" role="timer"></strong><button id="gym-mas-descanso">+30 s</button><button id="gym-saltar-descanso">Terminar descanso</button></div>
+            <p class="ayuda-campo">Los valores propuestos quedan pendientes. Confirma cada serie al realizarla. Editar una serie la deja pendiente de nuevo.</p>
+            <div id="lista-ejercicios"></div>
+            <div class="gym-nuevo"><h3>Añadir ejercicio a esta sesión</h3><label for="gym-nombre-ejercicio">Nombre exacto</label><input id="gym-nombre-ejercicio" type="text" maxlength="120" placeholder="Ej. Press banca"><label for="gym-variante">Variante (opcional)</label><input id="gym-variante" type="text" maxlength="120" placeholder="Ej. Mancuernas"><button id="gym-anadir-ejercicio">Añadir ejercicio</button></div>
+            <div class="gym-acciones"><button id="gym-terminar" class="accion-principal">Terminar entrenamiento</button><button id="gym-descartar" class="boton-discreto">Descartar sesión</button></div>
+        </div>
+        <p id="gym-resumen-final" role="status" hidden></p>
+        <div id="gym-historial-dia" class="panel-resumen"></div>
 
     </section>
 
@@ -306,7 +321,7 @@
                 <button id="resolver-remoto" type="button">Conservar la versión de la nube</button>
             </div>
             <button id="sincronizar-ahora" type="button">Sincronizar ahora</button>
-            <p class="nota-cuenta">Puedes registrar actividad sin conexión. Los cambios se enviarán al recuperar internet. El temporizador activo permanece en el dispositivo donde lo empezaste.</p>
+            <p class="nota-cuenta">Puedes registrar actividad sin conexión. Los cambios se enviarán al recuperar internet. El temporizador de estudio permanece en el dispositivo donde lo empezaste. El entrenamiento abierto se comparte con tu cuenta; sincroniza antes de cambiar de dispositivo.</p>
             <button id="salir-cuenta" type="button" class="secundario-cuenta">Cerrar sesión en este dispositivo</button>
         </div>
         <form id="form-recuperacion" hidden novalidate>
@@ -318,7 +333,9 @@
     <script src="config-sync.js"></script>
     <script src="datos-locales.js"></script>
     <script src="tareas.js"></script>
+    <script src="gimnasio-core.js"></script>
     <script src="app.js"></script>
+    <script src="gimnasio-vista.js"></script>
     <script src="resumenes.js"></script>
     <script src="interfaz.js"></script>
     <script src="pwa.js"></script>

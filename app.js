@@ -823,24 +823,29 @@
             datosGimnasio.entrenamientos = {};
         }
 
+        let ultimoGimnasioGuardado = almacenamientoApp.getItem('miDiaGimnasio');
+        let falloGuardadoGimnasio = false;
+        window.addEventListener('beforeunload', evento => {
+            if (falloGuardadoGimnasio) {evento.preventDefault();evento.returnValue='';}
+        });
         function guardarDatosGimnasio() {
             try {
-                almacenamientoApp.setItem(
-                    "miDiaGimnasio",
-                    JSON.stringify(datosGimnasio)
-                );
+                if (almacenamientoApp.getItem('miDiaGimnasio') !== ultimoGimnasioGuardado) {
+                    throw new Error('Otra pestaña ha cambiado el gimnasio. Conserva esta página abierta y revisa la otra pestaña antes de continuar.');
+                }
+                const nuevo = JSON.stringify(datosGimnasio);
+                almacenamientoApp.setItem('miDiaGimnasio', nuevo);
+                ultimoGimnasioGuardado = nuevo;
+                falloGuardadoGimnasio = false;
+                document.getElementById('gym-reintentar').hidden = true;
 
                 return true;
             } catch (error) {
                 console.error("No se pudo guardar:", error);
 
-                // Adaptamos los datos antiguos sin borrar las rutinas existentes.     
-
-                alert(
-                    "El cambio está en la página, pero no se ha podido " +
-                    "guardar en el navegador. Podría perderse al recargar."
-                );
-
+                falloGuardadoGimnasio = true;
+                document.getElementById('gym-reintentar').hidden = false;
+                mensajeRutinaDia.textContent = error.message + ' Los cambios siguen en esta página; no la cierres.';
                 return false;
             }
         }
@@ -909,70 +914,7 @@
                 : "Rutina añadida solo en esta página.";
         });
 
-        function cargarRutinaDelDia() {
-            selectorRutina.replaceChildren();
-
-            const opcionVacia = document.createElement("option");
-            opcionVacia.value = "";
-            opcionVacia.textContent = "Sin rutina seleccionada";
-            selectorRutina.appendChild(opcionVacia);
-
-            for (const nombre of datosGimnasio.rutinas) {
-                const opcion = document.createElement("option");
-                opcion.value = nombre;
-                opcion.textContent = nombre;
-                selectorRutina.appendChild(opcion);
-            }
-
-            const fecha = claveFecha(fechaSeleccionada);
-
-            selectorRutina.value = datosGimnasio.porDia[fecha] || "";
-            selectorRutina.disabled = datosGimnasio.rutinas.length === 0;
-
-            mensajeRutinaDia.textContent = selectorRutina.disabled
-                ? "Primero añade una rutina desde «Mis rutinas» en el calendario."
-                : "";
-
-            mostrarEntrenamientoDelDia();
-        }
-
-        selectorRutina.addEventListener("change", function () {
-            const fecha = claveFecha(fechaSeleccionada);
-            const nuevaRutina = selectorRutina.value;
-            const entrenamientoAnterior =
-                datosGimnasio.entrenamientos[fecha];
-
-            const tieneSeries =
-                entrenamientoAnterior &&
-                entrenamientoAnterior.ejercicios.some(function (ejercicio) {
-                    return ejercicio.series.length > 0;
-                });
-
-            if (tieneSeries) {
-                const confirmado = confirm(
-                    "Cambiar la rutina eliminará las series de este día. " +
-                    "¿Quieres continuar?"
-                );
-
-                if (!confirmado) {
-                    selectorRutina.value = datosGimnasio.porDia[fecha] || "";
-                    return;
-                }
-            }
-
-            if (nuevaRutina === "") {
-                delete datosGimnasio.porDia[fecha];
-                delete datosGimnasio.entrenamientos[fecha];
-            } else {
-                datosGimnasio.porDia[fecha] = nuevaRutina;
-
-                datosGimnasio.entrenamientos[fecha] =
-                    crearEntrenamiento(nuevaRutina);
-            }
-
-            guardarEntrenamientoDelDia();
-            mostrarEntrenamientoDelDia();
-        });
+        function cargarRutinaDelDia() { VistaGimnasio.mostrar(); }
 
         const selectorRutinaEditar =
             document.getElementById("rutina-a-editar");
@@ -1097,306 +1039,11 @@
                 : "Ejercicio añadido solo en esta página.";
         });
 
-        const listaEjerciciosDia =
-            document.getElementById("lista-ejercicios");
-
-        // Crea el registro de un día copiando los ejercicios de la rutina.
-        function crearEntrenamiento(rutina) {
-            const clave = "rutina:" + rutina;
-
-            const nombres =
-                datosGimnasio.ejerciciosPorRutina[clave] || [];
-
-            return {
-                rutina: rutina,
-                ejercicios: nombres.map(function (nombre) {
-                    return {
-                        nombre: nombre,
-                        series: []
-                    };
-                })
-            };
-        }
-
-        function guardarEntrenamientoDelDia() {
-            const guardado = guardarDatosGimnasio();
-
-            mensajeRutinaDia.textContent = guardado
-                ? "Entrenamiento guardado."
-                : "No se ha podido guardar en el navegador.";
-        }
-
-        function mostrarEntrenamientoDelDia() {
-            listaEjerciciosDia.replaceChildren();
-
-            const fecha = claveFecha(fechaSeleccionada);
-            const rutina = datosGimnasio.porDia[fecha];
-
-            if (!rutina) {
-                return;
-            }
-
-            // Si aún no existe, creamos el entrenamiento de esta fecha.
-            if (!datosGimnasio.entrenamientos[fecha]) {
-                datosGimnasio.entrenamientos[fecha] =
-                    crearEntrenamiento(rutina);
-
-                guardarEntrenamientoDelDia();
-            }
-
-            const entrenamiento = datosGimnasio.entrenamientos[fecha];
-
-            if (entrenamiento.ejercicios.length === 0) {
-                const aviso = document.createElement("p");
-                aviso.textContent =
-                    "Esta rutina no tiene ejercicios en este registro. " +
-                    "Añádelos en Mis rutinas y vuelve a seleccionar la rutina.";
-                listaEjerciciosDia.appendChild(aviso);
-                return;
-            }
-
-            entrenamiento.ejercicios.forEach(function (ejercicio, indiceEjercicio) {
-                const bloque = document.createElement("div");
-                bloque.classList.add("ejercicio-dia");
-
-                const titulo = document.createElement("h3");
-                titulo.textContent = ejercicio.nombre;
-                bloque.appendChild(titulo);
-
-                const ultimoRegistro = buscarUltimoRegistro(
-                    ejercicio.nombre,
-                    fecha
-                );
-
-                const referencia = document.createElement("p");
-                referencia.classList.add("referencia-ejercicio");
-
-                if (ultimoRegistro !== null) {
-                    const resumenSeries = ultimoRegistro.series.map(
-                        function (serie) {
-                            return serie.repeticiones + " × " + serie.peso + " kg";
-                        }
-                    );
-
-                    referencia.textContent =
-                        "Última vez (" + ultimoRegistro.fecha + "): " +
-                        resumenSeries.join(" · ");
-                } else {
-                    referencia.textContent = "Sin registros anteriores.";
-                }
-
-                bloque.appendChild(referencia);
-
-                ejercicio.series.forEach(function (serie, indice) {
-                    const fila = document.createElement("div");
-                    fila.classList.add("fila-serie");
-
-                    const numero = document.createElement("span");
-                    numero.textContent = "Serie " + (indice + 1);
-
-                    const etiquetaRepes = document.createElement("label");
-                    etiquetaRepes.textContent = "Repeticiones";
-
-                    const repes = document.createElement("input");
-                    repes.type = "number";
-                    repes.inputMode = "numeric";
-                    repes.min = "1";
-                    repes.step = "1";
-                    repes.placeholder = "Ej. 10";
-                    repes.value = serie.repeticiones;
-
-                    const etiquetaPeso = document.createElement("label");
-                    etiquetaPeso.textContent = "Peso (kg)";
-
-                    const peso = document.createElement("input");
-                    peso.type = "number";
-                    peso.inputMode = "decimal";
-                    peso.min = "0";
-                    peso.step = "any";
-                    peso.placeholder = "Ej. 20";
-                    peso.value = serie.peso;
-
-                    repes.addEventListener("change", function () {
-                        if (!repes.checkValidity()) {
-                            repes.reportValidity();
-                            return;
-                        }
-
-                        serie.repeticiones = repes.value;
-                        guardarEntrenamientoDelDia();
-                    });
-
-                    peso.addEventListener("change", function () {
-                        if (!peso.checkValidity()) {
-                            peso.reportValidity();
-                            return;
-                        }
-
-                        serie.peso = peso.value;
-                        guardarEntrenamientoDelDia();
-                    });
-
-                    etiquetaRepes.appendChild(repes);
-                    etiquetaPeso.appendChild(peso);
-
-                    const botonQuitarSerie = document.createElement("button");
-                    botonQuitarSerie.textContent = "×";
-                    botonQuitarSerie.classList.add("quitar-serie");
-
-                    botonQuitarSerie.setAttribute(
-                        "aria-label",
-                        "Quitar serie " + (indice + 1) + " de " + ejercicio.nombre
-                    );
-
-                    botonQuitarSerie.addEventListener("click", function () {
-                        const tieneDatos =
-                            serie.repeticiones !== "" || serie.peso !== "";
-
-                        if (tieneDatos) {
-                            const confirmado = confirm(
-                                "¿Quieres eliminar esta serie y sus datos?"
-                            );
-
-                            if (!confirmado) {
-                                return;
-                            }
-                        }
-
-                        ejercicio.series.splice(indice, 1);
-
-                        guardarEntrenamientoDelDia();
-                        mostrarEntrenamientoDelDia();
-                    });
-
-                    fila.appendChild(numero);
-                    fila.appendChild(etiquetaRepes);
-                    fila.appendChild(etiquetaPeso);
-                    fila.appendChild(botonQuitarSerie);
-
-                    bloque.appendChild(fila);
-                });
-
-                const botonSerie = document.createElement("button");
-                botonSerie.textContent = "+ Añadir serie";
-
-                botonSerie.addEventListener("click", function () {
-                    ejercicio.series.push({
-                        repeticiones: "",
-                        peso: ""
-                    });
-
-                    guardarEntrenamientoDelDia();
-                    mostrarEntrenamientoDelDia();
-                    enfocarUltimaSerie(indiceEjercicio);
-                });
-
-                bloque.appendChild(botonSerie);
-                const ultimaSerie = ejercicio.series[ejercicio.series.length - 1];
-                if (ultimaSerie) {
-                    const repetirSerie = document.createElement('button');
-                    repetirSerie.textContent = 'Repetir última serie';
-                    repetirSerie.className = 'boton-discreto';
-                    repetirSerie.addEventListener('click', () => {
-                        ejercicio.series.push({...ejercicio.series[ejercicio.series.length - 1]});
-                        guardarEntrenamientoDelDia();
-                        mostrarEntrenamientoDelDia();
-                        enfocarUltimaSerie(indiceEjercicio);
-                    });
-                    bloque.appendChild(repetirSerie);
-                }
-                if (ultimoRegistro && ejercicio.series.length === 0) {
-                    const copiarAnterior = document.createElement('button');
-                    copiarAnterior.textContent = 'Usar series de la última vez';
-                    copiarAnterior.className = 'boton-discreto';
-                    copiarAnterior.addEventListener('click', () => {
-                        ejercicio.series = ultimoRegistro.series.map(serie => ({...serie}));
-                        guardarEntrenamientoDelDia();
-                        mostrarEntrenamientoDelDia();
-                        enfocarUltimaSerie(indiceEjercicio);
-                    });
-                    bloque.appendChild(copiarAnterior);
-                }
-                listaEjerciciosDia.appendChild(bloque);
-            });
-        }
-
-        function enfocarUltimaSerie(indiceEjercicio) {
-            const bloque = listaEjerciciosDia.children[indiceEjercicio];
-            const filas = bloque.querySelectorAll('.fila-serie');
-            filas[filas.length - 1]?.querySelector('input')?.focus();
-        }
-
-        function buscarUltimoRegistro(nombreEjercicio, fechaActual) {
-            const fechas = Object.keys(datosGimnasio.entrenamientos);
-
-            // Ordenamos de la fecha más reciente a la más antigua.
-            fechas.sort().reverse();
-
-            for (const fecha of fechas) {
-                // Solo consultamos días anteriores al seleccionado.
-                if (fecha >= fechaActual) {
-                    continue;
-                }
-
-                const entrenamiento = datosGimnasio.entrenamientos[fecha];
-
-                for (const ejercicio of entrenamiento.ejercicios) {
-                    const mismoNombre =
-                        ejercicio.nombre.trim().toLowerCase() ===
-                        nombreEjercicio.trim().toLowerCase();
-
-                    if (mismoNombre) {
-                        const seriesCompletas = ejercicio.series.filter(
-                            function (serie) {
-                                return (
-                                    serie.repeticiones !== "" &&
-                                    serie.peso !== ""
-                                );
-                            }
-                        );
-
-                        if (seriesCompletas.length > 0) {
-                            return {
-                                fecha: fecha,
-                                series: seriesCompletas
-                            };
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
         function obtenerResumenGimnasio(fecha) {
-            const clave = claveFecha(fecha);
-            const entrenamiento = datosGimnasio.entrenamientos[clave];
-
-            if (!entrenamiento) {
-                return "";
-            }
-
-            let totalSeries = 0;
-
-            for (const ejercicio of entrenamiento.ejercicios) {
-                for (const serie of ejercicio.series) {
-                    if (
-                        serie.repeticiones !== "" &&
-                        serie.peso !== ""
-                    ) {
-                        totalSeries++;
-                    }
-                }
-            }
-
-            if (totalSeries === 0) {
-                return "";
-            }
-
-            const textoSeries = totalSeries === 1 ? "serie" : "series";
-
-            return entrenamiento.rutina + " · " +
-                totalSeries + " " + textoSeries;
+            const entrenamiento = datosGimnasio.entrenamientos[claveFecha(fecha)];
+            if (!entrenamiento) return '';
+            const total = entrenamiento.ejercicios.reduce((n,e) => n + e.series.filter(GimnasioMiDia.completada).length,0);
+            return total ? entrenamiento.rutina + ' · ' + total + (total === 1 ? ' serie' : ' series') : '';
         }
 
         mostrarCarrusel();
