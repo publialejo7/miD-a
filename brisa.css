@@ -1,0 +1,306 @@
+/* Brisa: lenguaje visual compartido. La posición y los gestos del carrusel
+   siguen en estilos.css y app.js; aquí solo cambia su presentación. */
+:root {
+    color-scheme: light;
+    --fondo: #f5f5f7;
+    --superficie: #ffffff;
+    --borde: #e5e7eb;
+    --texto: #202126;
+    --secundario: #6d727b;
+    --acento: #1766d8;
+    --brisa-suave: #eaf1fd;
+    --brisa-campo: #f1f3f6;
+    --brisa-verde: #23704a;
+    --brisa-realizada: #edf7f0;
+    --brisa-sombra: 0 4px 24px #17284405;
+}
+html { background: var(--fondo); }
+body {
+    max-width: 760px;
+    background: var(--fondo);
+    color: var(--texto);
+    padding-inline: 24px;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+body > section { padding-top: 30px; }
+h1, h2, h3 { letter-spacing: -.035em; font-weight: 650; color: var(--texto); }
+h1 { font-size: clamp(30px, 6vw, 38px); margin: 20px 0 10px; }
+h2 { font-size: 21px; }
+h3 { font-size: 18px; }
+button, input, select, textarea { font-family: inherit; }
+body > section button, .cabecera-app button, #acceso-sesion button {
+    background: var(--superficie);
+    color: var(--texto);
+    border-color: transparent;
+    border-radius: 14px;
+    font-weight: 500;
+}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 3px;
+}
+@media (hover: hover) {
+    body > section button:not(:disabled):not(.tarjeta-dia):hover, #acceso-sesion button:hover {
+        border-color: transparent;
+        filter: brightness(.98);
+    }
+}
+.cabecera-app { border-bottom: 0; padding-bottom: 4px; gap: 12px; }
+.cabecera-app #inicio-app { color: var(--texto); font-size: 19px; font-weight: 650; }
+.marca-app { width: 34px; height: 34px; border-radius: 11px; font-size: 24px; background: var(--acento); color: white; }
+.cabecera-app .acceso-cuenta { border: 0; background: transparent; padding: 4px 0 4px 8px; font-size: 13px; color: var(--texto); }
+.acceso-cuenta small { color: var(--secundario); font-size: 10px; }
+.antetitulo { color: var(--secundario); letter-spacing: .07em; font-size: 11px; font-weight: 500; }
+.intro-resumen { color: var(--secundario); font-size: 15px; line-height: 1.6; }
+.titulo-seccion { align-items: center; gap: 12px; margin-bottom: 14px; }
+.titulo-seccion h2 { font-size: 20px; font-weight: 650; }
+.titulo-seccion > span, .ayuda-campo { color: var(--secundario); font-size: 12px; }
+#pantalla-semana .antetitulo { color: var(--secundario); font-size: 12px; font-weight: 500; letter-spacing: .025em; margin: 0 0 24px; text-transform: capitalize; }
+#navegacion-dias { margin: 16px 0 0; align-items: center; }
+#navegacion-dias button { background: transparent; color: var(--secundario); border: 0; padding: 5px 12px; }
+#navegacion-dias #ir-hoy { background: transparent; color: var(--acento); font-size: 12px; }
+#navegacion-dias #anterior, #navegacion-dias #siguiente { font-size: 27px; }
+#carrusel { height: 304px; margin: 0 -8px 20px; }
+#carrusel > .tarjeta-dia {
+    top: calc(23px - var(--protagonismo) * 15px);
+    height: calc(240px + var(--protagonismo) * 36px);
+    padding: 16px 12px;
+    background: var(--superficie);
+    border: 0;
+    border-radius: 26px;
+    color: var(--texto);
+    box-shadow: 0 8px 28px #182e4b0a;
+}
+#carrusel .tarjeta-dia .dia-semana { color: var(--secundario); font-size: calc(11px + var(--protagonismo) * 3px); font-weight: 500; }
+#carrusel .tarjeta-dia .numero-dia { color: var(--texto); font-size: calc(34px + var(--protagonismo) * 26px); font-weight: 500; letter-spacing: -.06em; }
+#carrusel .tarjeta-dia .mes-dia { color: var(--secundario); font-size: 11px; }
+#carrusel .tarjeta-dia .etiqueta-dia { color: var(--acento); background: var(--brisa-suave); border-radius: 8px; padding: 2px 9px; font-size: 11px; margin-top: 7px; }
+#carrusel .tarjeta-dia .resumen-dia, #carrusel .tarjeta-dia .resumen-gimnasio { color: var(--secundario); font-size: 11px; margin-top: 7px; line-height: 1.4; }
+#carrusel .tarjeta-dia .resumen-tareas { background: transparent; color: var(--texto); padding: 0; font-size: 11px; margin-top: 7px; }
+#carrusel .tarjeta-dia .detalle-tareas-carrusel { color: var(--secundario); font-size: 11px; line-height: 1.35; -webkit-line-clamp: 2; margin-top: 4px; }
+.panorama-hoy { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 30px; }
+.panorama-hoy > button, #pantalla-semana .panorama-hoy > button {
+    min-width: 0;
+    min-height: 158px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 17px 14px;
+    background: var(--superficie);
+    border: 0;
+    border-radius: 22px;
+    color: var(--texto);
+    text-align: left;
+    box-shadow: var(--brisa-sombra);
+}
+.brisa-icon { width: 22px; height: 22px; color: var(--acento); flex: none; margin-bottom: 14px; }
+.panorama-hoy > button > span { color: var(--secundario); font-size: 12px; }
+.panorama-hoy strong { margin-top: 5px; font-size: 18px; font-weight: 600; line-height: 1.35; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.panorama-hoy small { margin-top: auto; padding-top: 14px; color: var(--acento); font-size: 11px; }
+.panorama-hoy small span { margin-left: 4px; }
+.panel-resumen, .panel-agenda { border: 0; border-radius: 24px; background: var(--superficie); box-shadow: var(--brisa-sombra); padding: 22px; }
+#pantalla-semana .prioridades-inicio { background: transparent; box-shadow: none; border: 0; border-radius: 0; padding: 0; margin: 0; }
+#pantalla-semana #abrir-agenda { color: var(--acento); background: transparent; padding: 5px 0 5px 10px; font-size: 12px; border: 0; }
+#resumen-agenda-inicio { margin: 0 0 12px; font-size: 12px; }
+#proximas-tareas { background: var(--superficie); padding: 0 20px; border-radius: 24px; margin-top: 0; }
+.lista-tareas .fila-tarea { border-color: var(--borde); }
+.fila-tarea strong { color: var(--texto); font-weight: 550; }
+.fila-tarea small, .datos-tarea { color: var(--secundario); }
+body > section .fila-tarea input[type=checkbox] { accent-color: var(--acento); border-color: var(--borde); }
+.tipo-tarea { background: var(--brisa-suave); color: var(--acento); border-color: transparent; }
+.tipo-examen { background: #fff0e7; color: #986131; }
+.tarea-terminada strong { color: var(--secundario); }
+#pantalla-semana #abrir-rutinas { margin-top: 18px; padding: 12px 0; border: 0; background: transparent; color: var(--secundario); }
+#pantalla-semana #abrir-rutinas strong { font-size: 13px; font-weight: 500; }
+#pantalla-semana #abrir-rutinas small { font-size: 11px; }
+#gym-continuar, #gym-continuar-resumen { color: var(--acento); border: 0; background: var(--brisa-suave); border-radius: 18px; padding: 16px; margin-bottom: 22px; }
+.barra-inferior { background: #ffffffeb; border: 1px solid #ffffffaa; box-shadow: 0 8px 40px #1b2d4521; border-radius: 25px 25px 0 0; backdrop-filter: blur(22px) saturate(1.4); }
+.barra-inferior button { color: var(--secundario); font-weight: 400; }
+.barra-inferior button[aria-current=page], .barra-inferior button[data-deslizamiento=true] { background: var(--brisa-suave); color: var(--acento); box-shadow: none; }
+.barra-inferior[data-deslizando=true]::before { background: var(--brisa-suave); }
+@media(hover:hover) { .barra-inferior button:hover { color: var(--acento); background: var(--brisa-suave); } }
+.pie-app { border: 0; color: var(--secundario); margin-top: 28px; padding-top: 16px; }
+.pie-app span { color: var(--secundario); }
+#volver, #volver-al-dia, #volver-del-gimnasio, #volver-de-rutinas { color: var(--acento); }
+.resumen-actividad { border-color: var(--borde); }
+.resumen-actividad strong, .resumen-actividad > div:first-child strong, .resumen-actividad > div + div strong { color: var(--texto); }
+#opciones-dia .icono-opcion, #abrir-gimnasio .icono-opcion { color: var(--acento); background: var(--brisa-suave); }
+#opciones-dia button { background: var(--superficie); padding: 20px; border-radius: 22px; }
+body > section input:not([type=checkbox]), body > section select, body > section textarea,
+#pantalla-productividad input, #pantalla-gimnasio input, #pantalla-rutinas input, #pantalla-agenda input:not([type=checkbox]), #pantalla-agenda select, #pantalla-agenda textarea, #modo-estudio, #rutina-a-editar, #rutina-del-dia {
+    background: var(--brisa-campo);
+    color: var(--texto);
+    border-color: transparent;
+    border-radius: 12px;
+}
+input::placeholder, textarea::placeholder { color: #828792; opacity: 1; }
+body > section label { color: var(--texto); font-weight: 500; }
+.opcional, #fecha-productividad, #fecha-gimnasio { color: var(--secundario); }
+.acciones-resumen { margin-top: 22px; }
+.acciones-resumen .accion-principal, #guardar-tarea, #guardar-rutina, #guardar-ejercicio { color: white; background: var(--acento); border-color: transparent; }
+.selector-modo, .selector-periodo, .selector-estado-tareas { background: #e9ebef; border: 0; border-radius: 14px; padding: 4px; }
+.selector-periodo button, .selector-estado-tareas button { color: var(--secundario); background: transparent; }
+.selector-periodo button[aria-pressed=true], #pantalla-resumen-gimnasio .selector-periodo button[aria-pressed=true], .selector-estado-tareas button[aria-pressed=true] { color: var(--texto); background: var(--superficie); box-shadow: 0 2px 6px #17284409; border-radius: 10px; }
+.metricas-resumen { gap: 10px; }
+.metrica-resumen { background: var(--superficie); border: 0; border-radius: 20px; padding: 20px 15px; }
+.metrica-resumen strong { color: var(--texto); font-weight: 550; }
+.metrica-resumen span { color: var(--secundario); }
+.navegacion-periodo h2 { font-size: 17px; }
+.navegacion-periodo button { background: transparent; color: var(--acento); }
+.calendario-actividad button { background: var(--brisa-campo); color: var(--texto); border-color: transparent; }
+.calendario-actividad button small { color: var(--secundario); }
+.calendario-actividad button[data-intensidad="1"], #gym-calendario button[data-intensidad="1"] { background: #e8f0fc; border: 0; color: #356bb5; }
+.calendario-actividad button[data-intensidad="2"], #gym-calendario button[data-intensidad="2"] { background: #cee0fa; border: 0; color: #2458a3; }
+.calendario-actividad button[data-intensidad="3"], #gym-calendario button[data-intensidad="3"] { background: #a6c8f5; border: 0; color: #163c70; }
+.calendario-actividad button[data-intensidad="3"] small { color: #163c70; }
+.calendario-actividad button[data-hoy=true] { outline: 2px solid var(--acento); }
+#agenda-calendario button[data-completas=true] { background: var(--brisa-realizada); color: var(--brisa-verde); border-color: transparent; }
+#agenda-calendario button[data-completas=true] small { color: var(--brisa-verde); }
+.cabecera-calendario, .lista-desglose span, .vacio-resumen { color: var(--secundario); }
+.lista-desglose li { border-color: var(--borde); }
+/* Gimnasio: una plantilla por superficie, registros sin cajas anidadas. */
+#pantalla-resumen-gimnasio > h1 { margin-top: 9px; }
+.gym-seccion-titulo { font-size: 20px; margin: 30px 0 16px; }
+.gym-acciones-portada { display: flex; justify-content: space-between; gap: 12px; }
+.gym-acciones-portada button { flex: 1; font-size: 13px; }
+.gym-acciones-portada #rutinas-resumen { color: var(--acento); background: transparent; }
+.gym-rutinas-grid { gap: 14px; }
+.gym-rutina-card, #lista-rutinas .gym-rutina-card { background: var(--superficie); border: 0; border-radius: 25px; padding: 24px; box-shadow: var(--brisa-sombra); }
+.gym-rutina-titulo h3 { font-size: 21px; letter-spacing: -.045em; }
+.gym-rutina-descripcion { color: var(--secundario); font-size: 13px; line-height: 1.75; margin: 13px 0; }
+.gym-rutina-card > small { color: var(--secundario); font-size: 12px; }
+.gym-rutina-card .boton-discreto { color: var(--acento); background: transparent; border: 0; font-size: 12px; padding: 6px 0 6px 10px; margin: 0; }
+:is(#pantalla-gimnasio,#pantalla-rutinas,#pantalla-resumen-gimnasio) .gym-empezar-card,
+:is(#pantalla-gimnasio,#pantalla-rutinas) .gym-catalogo-boton, #pantalla-rutinas #rutina-guardar-cambios {
+    color: white; background: var(--acento); border-color: transparent; border-radius: 14px; font-weight: 550;
+}
+.gym-crear, .gym-personalizado, .gym-nuevo { background: transparent; border: 0; padding: 15px 0; margin: 12px 0; border-radius: 0; }
+.gym-crear > summary, .gym-personalizado > summary, .gym-nuevo > summary { color: var(--acento); font-size: 13px; }
+.gym-crear > summary { background: var(--superficie); padding: 16px 20px; border-radius: 18px; }
+.gym-crear[open] { background: var(--superficie); padding: 20px; border-radius: 22px; }
+.gym-crear[open] > summary { padding: 0; }
+.gym-rutina-editor-cabecera { margin-top: 20px; align-items: center; }
+.gym-rutina-editor-cabecera h2 { font-size: 24px; }
+.gym-editor-ejercicio { background: var(--superficie); border: 0; border-radius: 24px; padding: 22px 16px; margin: 18px 0; box-shadow: var(--brisa-sombra); }
+.gym-ejercicio-titulo { gap: 12px; margin-bottom: 16px; }
+.gym-ejercicio-titulo h3 { color: var(--texto); font-size: 17px; letter-spacing: -.035em; background: transparent; }
+.gym-ejercicio-titulo small { color: var(--secundario); }
+.gym-ejercicio-titulo img { width: 48px; height: 48px; border-radius: 13px; }
+.gym-menu summary { width: 36px; height: 42px; border: 0; color: var(--secundario); background: transparent; }
+.gym-menu-acciones { border: 1px solid var(--borde); background: var(--superficie); box-shadow: 0 10px 35px #1a304224; border-radius: 18px; }
+:is(#pantalla-gimnasio,#pantalla-rutinas) .gym-menu-acciones button { background: transparent; color: var(--texto); font-size: 13px; }
+.gym-ejercicio-ajustes label { color: var(--secundario); }
+.gym-tabla-titulos { color: var(--secundario); font-size: 10px; letter-spacing: .035em; padding-bottom: 9px; }
+.gym-serie.gym-fila-compacta { border-color: var(--borde); padding: 9px 2px; }
+.gym-serie.gym-fila-compacta.realizada { background: var(--brisa-realizada); border-color: transparent; }
+.gym-fila-compacta > .gym-tipo-control { color: var(--secundario); background: var(--brisa-campo); border: 0; border-radius: 11px; }
+.gym-serie.gym-fila-compacta input, #pantalla-gimnasio .gym-serie.propuesta input { background: var(--brisa-campo); color: var(--secundario); border: 0; }
+#pantalla-gimnasio .gym-serie.realizada input { background: #ffffffad; color: var(--texto); }
+.gym-serie.gym-fila-compacta input:focus { color: var(--texto); background: var(--brisa-suave); outline-color: var(--acento); }
+.gym-anterior { color: var(--secundario); font-size: 11px; }
+#pantalla-gimnasio .gym-serie .gym-completar { color: var(--secundario); background: transparent; border: 1px solid var(--borde); }
+#pantalla-gimnasio .gym-serie.realizada .gym-completar { color: white; background: var(--brisa-verde); border-color: transparent; }
+.gym-series-acciones { margin-top: 12px; }
+:is(#pantalla-gimnasio,#pantalla-rutinas) .gym-series-acciones button { color: var(--acento); background: var(--brisa-suave); border: 0; }
+:is(#pantalla-gimnasio,#pantalla-rutinas) .gym-series-acciones .boton-discreto { background: transparent; color: var(--secundario); }
+#pantalla-gimnasio .gym-cabecera { background: #f5f5f7f0; border: 0; padding: 15px 0; backdrop-filter: blur(16px); }
+.gym-cabecera h2 { color: var(--texto); font-size: 19px; }
+.gym-cabecera #gym-tiempo { color: var(--secundario); font-size: 12px; }
+#gym-reloj-total { color: var(--texto); font-size: 30px; font-weight: 500; letter-spacing: -.06em; }
+.gym-ajustes { background: var(--superficie); border: 0; border-radius: 18px; padding: 16px 18px; margin: 8px 0 16px; }
+.gym-ajustes summary { font-size: 13px; color: var(--secundario); min-height: auto; }
+.gym-ajustes label, .gym-ajustes p { font-size: 12px; }
+.gym-descanso { color: var(--acento); background: var(--brisa-suave); border: 0; border-radius: 18px; }
+#pantalla-gimnasio .gym-descanso button { background: #ffffff99; color: var(--acento); border: 0; font-size: 12px; }
+#pantalla-gimnasio #gym-terminar { color: white; background: var(--acento); border: 0; }
+#pantalla-gimnasio #gym-descartar { color: #a04a45; background: transparent; }
+#gym-historial-dia h2 { font-size: 18px; margin-top: 0; }
+#gym-historial-dia p { color: var(--secundario); font-size: 13px; line-height: 1.7; }
+#gym-resumen-final { background: var(--brisa-realizada); color: var(--brisa-verde); border: 0; }
+#mensaje-rutinas, #mensaje-ejercicios, #mensaje-rutina-dia { color: var(--secundario); font-size: 12px; }
+.gym-error { color: #a34334; }
+.gym-dialog, .dialog-cuenta { border: 1px solid #ffffffdd; background: var(--fondo); color: var(--texto); border-radius: 28px; padding: 24px 20px; box-shadow: 0 20px 80px #16202f33; }
+.gym-dialog::backdrop, .dialog-cuenta::backdrop { background: #1822344d; backdrop-filter: blur(8px); }
+.gym-dialog button, .dialog-cuenta button { background: var(--superficie); color: var(--acento); border: 0; border-radius: 13px; }
+.gym-dialog input, .gym-dialog select, .dialog-cuenta input { background: var(--superficie); color: var(--texto); border-color: transparent; }
+.gym-dialog .catalogo-ejercicio select { background: var(--brisa-campo); color: var(--texto); }
+.gym-dialog .catalogo-elegir, .acciones-cuenta button { background: var(--acento); color: white; }
+.gym-dialog-cabecera .antetitulo { color: var(--secundario); }
+.catalogo-ejercicio { border-color: var(--borde); }
+.catalogo-ejercicio small { color: var(--secundario); }
+.catalogo-ejercicio h3 { color: var(--texto); font-size: 15px; }
+.dialog-cuenta p, .dialog-cuenta li, .nota-cuenta { color: var(--secundario); }
+#importar-dispositivo, #conflictos-nube { background: var(--superficie); border-color: var(--borde); border-radius: 18px; }
+#importar-dispositivo button, #conflictos-nube button { background: var(--brisa-suave); color: var(--acento); }
+.estado-pwa { background: var(--brisa-suave); border: 0; border-radius: 18px; }
+.estado-pwa p { color: var(--texto); }
+.estado-pwa button { background: var(--acento); border: 0; color: white; }
+#acceso-sesion { background: #fffffff0; border: 1px solid #ffffffdd; border-radius: 18px; box-shadow: 0 6px 24px #17284410; backdrop-filter: blur(18px); }
+#acceso-sesion-tiempo { color: var(--secundario); }
+#acceso-sesion button { background: var(--brisa-suave); color: var(--acento); border: 0; }
+#pantalla-productividad .selector-modo button { background: transparent; color: var(--secundario); }
+#pantalla-productividad .selector-modo button[aria-pressed=true] { background: var(--superficie); color: var(--texto); border-color: transparent; box-shadow: 0 2px 6px #17284409; }
+#pantalla-productividad .selector-modo button[aria-pressed=true] small, .selector-modo small { color: var(--secundario); }
+#panel-temporizador { background: var(--superficie); border: 0; border-radius: 25px; box-shadow: var(--brisa-sombra); }
+#panel-temporizador #estado-temporizador { color: var(--secundario); }
+#panel-temporizador #empezar-estudio { background: var(--acento); color: white; border: 0; }
+#panel-temporizador #terminar-estudio { color: var(--secundario); }
+#panel-temporizador[data-fase=corto], #panel-temporizador[data-fase=largo] { background: var(--brisa-realizada); }
+#panel-temporizador[data-fase=pausa] { background: #fff6e9; }
+#avance-pomodoro, #avance-pomodoro::-webkit-progress-bar { background: var(--borde); }
+#avance-pomodoro::-webkit-progress-value { background: var(--acento); }
+#avance-pomodoro::-moz-progress-bar { background: var(--acento); }
+#aviso-estudio { background: var(--brisa-suave); color: var(--texto); border-left-color: var(--acento); }
+#sesion-activa { color: var(--secundario); }
+#lista-sesiones .accion-borrar { color: #a04a45; }
+/* La vista de concentración conserva su fondo y el nivel de líquido existentes. */
+body[data-foco=true] #panel-temporizador { color: white; }
+body[data-foco=true] #panel-temporizador #estado-temporizador { color: #ffffffe0; }
+body[data-foco=true] #panel-temporizador #cronometro { color: white; }
+@media(max-width:480px) {
+    body { padding-inline: 18px; }
+    .panorama-hoy { gap: 8px; }
+    #pantalla-semana .panorama-hoy > button { padding: 15px 11px; min-height: 155px; border-radius: 20px; }
+    .panorama-hoy strong { font-size: 16px; }
+    .panorama-hoy > button > span { font-size: 11px; }
+    .gym-rutina-card, #lista-rutinas .gym-rutina-card { padding: 21px; }
+    .panel-resumen { padding: 20px; }
+}
+@media(max-width:360px) {
+    body { padding-inline: 12px; }
+    .panorama-hoy { gap: 6px; }
+    #pantalla-semana .panorama-hoy > button { padding-inline: 9px; min-height: 157px; }
+    .panorama-hoy strong { font-size: 15px; }
+    .panorama-hoy small { font-size: 10px; }
+    .gym-editor-ejercicio { padding: 18px 10px; }
+}
+@media(prefers-reduced-motion:no-preference) {
+    button:not(.tarjeta-dia), input, select { transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease; }
+}
+.metricas-resumen > div { background: var(--superficie); border: 0; border-radius: 20px; padding: 20px 15px; }
+.metricas-resumen strong, #gym-metricas strong, .lista-desglose strong, #gym-detalle strong { color: var(--texto); font-weight: 550; }
+#gym-calendario small { color: var(--secundario); }
+#carrusel .tarjeta-dia .resumen-tareas { position: static; max-width: 100%; }
+.mensaje-tareas, #mensaje-agenda { color: var(--secundario); }
+.meta-tarea[data-vencida=true] { color: #936129; }
+.acciones-tarea .accion-borrar { color: #a04a45; }
+#pantalla-semana .titulo-seccion h2 { font-size: 20px; }
+#pantalla-gimnasio #gestionar-rutinas-gimnasio { background: transparent; color: var(--acento); padding-inline: 0; }
+#carrusel .tarjeta-dia .resumen-dia:empty { display: none; }
+/* Evitar énfasis heredados en Inicio y mantener un único acento en la navegación. */
+.barra-inferior #nav-inicio { color: var(--secundario); background: transparent; box-shadow: none; }
+.barra-inferior #nav-inicio[aria-current=page] { color: var(--acento); background: var(--brisa-suave); box-shadow: none; }
+.barra-inferior[data-deslizando=true] #nav-inicio[aria-current=page] { background: transparent; }
+#pantalla-gimnasio #volver-del-gimnasio, #pantalla-rutinas #volver-de-rutinas, #pantalla-productividad #volver-al-dia { color: var(--acento); background: transparent; border: 0; padding: 6px 0; }
+#pantalla-gimnasio #gym-descartar { border: 0; background: transparent; }
+#pantalla-gimnasio #gym-abrir-catalogo { background: var(--superficie); color: var(--acento); }
+#pantalla-semana .antetitulo { text-transform: none; }
+#fecha-hoy::first-letter { text-transform: uppercase; }
+body > section .fila-tarea input[type=checkbox] { appearance: none; display: grid; place-items: center; width: 23px; height: 23px; min-height: 23px; border: 1.5px solid #b8bec8; border-radius: 50%; background: transparent; }
+body > section .fila-tarea input[type=checkbox]:checked { background: var(--acento); border-color: var(--acento); }
+body > section .fila-tarea input[type=checkbox]:checked::after { content: '✓'; color: white; font-size: 15px; font-weight: 600; }
+@media(forced-colors:active) { body > section .fila-tarea input[type=checkbox] { appearance: auto; } body > section .fila-tarea input[type=checkbox]::after { display: none; } }

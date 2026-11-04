@@ -10,7 +10,7 @@
         if (estado) $('estado-sincronizacion').textContent = estado;
     }
     function editando() {
-        return falloGuardadoGimnasio || !!document.activeElement?.matches('input, textarea, select, [contenteditable]') || punteroActivo !== null;
+        return document.getElementById('gym-catalogo').open || falloGuardadoGimnasio || !!document.activeElement?.matches('input, textarea, select, [contenteditable]') || punteroActivo !== null;
     }
     function refrescarDatos() {
         const docs = DatosMiDia.leer().datos;
@@ -65,7 +65,7 @@
                 if(!valor)return 'Eliminado';
                 if(valor.titulo)return valor.titulo+' · '+valor.fecha+' · '+(valor.terminada?'Terminada':'Pendiente')+(valor.notas?' · '+valor.notas:'');
                 if(valor.materia)return valor.materia+' · '+valor.fecha+' · '+Math.round(valor.duracion/1000)+' s'+(valor.objetivo?' · '+valor.objetivo:'');
-                if(valor.nombre)return valor.nombre+' · '+valor.ejercicios.join(', ');
+                if(valor.nombre)return valor.nombre+' · '+valor.ejercicios.map(e=>typeof e==='string'?e:e.nombre+(e.variante?' · '+e.variante:'')).join(', ');
                 return valor.rutina+' · '+(valor.entrenamiento?.ejercicios || []).map(e=>e.nombre+': '+e.series.map(s=>s.repeticiones+' × '+s.peso+' kg').join(', ')).join(' / ');
             };
             li.textContent='Dispositivo: '+describir(conflicto.local)+' / Nube: '+describir(conflicto.remoto);

@@ -74,11 +74,12 @@
                 const resumen = document.createElement("span");
                 resumen.classList.add("resumen-dia");
 
+                const textoGimnasio = obtenerResumenGimnasio(fecha);
                 const tiempoEstudiado = obtenerTiempoDelDia(fecha);
                 const minutosTotales = Math.floor(tiempoEstudiado / 60000);
 
                 if (tiempoEstudiado === 0) {
-                    resumen.textContent = "Sin estudio registrado";
+                    resumen.textContent = textoGimnasio ? "" : "Sin actividad registrada";
                 } else if (minutosTotales === 0) {
                     resumen.textContent = "Estudio: menos de 1 min";
                 } else {
@@ -101,8 +102,6 @@
                     detalle.title = nombres.join(' · ');
                     tarjeta.appendChild(detalle);
                 }
-
-                const textoGimnasio = obtenerResumenGimnasio(fecha);
 
                 if (textoGimnasio !== "") {
                     const resumenGimnasio = document.createElement("span");
@@ -850,23 +849,7 @@
             }
         }
 
-        function mostrarRutinas() {
-            listaRutinas.replaceChildren();
-
-            for (const nombre of datosGimnasio.rutinas) {
-                const elemento = document.createElement("li");
-                elemento.textContent = nombre;
-                listaRutinas.appendChild(elemento);
-            }
-
-            if (datosGimnasio.rutinas.length === 0) {
-                const elemento = document.createElement("li");
-                elemento.textContent = "Todavía no has añadido rutinas.";
-                listaRutinas.appendChild(elemento);
-            }
-
-            cargarRutinasParaEditar();
-        }
+        function mostrarRutinas() { RutinasGimnasio.mostrar(); cargarRutinasParaEditar(); }
 
         botonAbrirRutinas.addEventListener("click", function () {
             mostrarRutinas();
@@ -907,7 +890,7 @@
             mostrarRutinas();
             selectorRutinaEditar.value = nombre;
             mostrarEjerciciosDeRutina();
-            campoNuevoEjercicio.focus();
+            document.getElementById('rutina-catalogo').focus();
 
             mensajeRutinas.textContent = guardado
                 ? "Rutina guardada."
@@ -957,36 +940,7 @@
         }
 
         // Muestra los ejercicios de la rutina seleccionada.
-        function mostrarEjerciciosDeRutina() {
-            listaEjerciciosRutina.replaceChildren();
-            mensajeEjercicios.textContent = "";
-
-            const rutina = selectorRutinaEditar.value;
-
-            campoNuevoEjercicio.disabled = rutina === "";
-            botonGuardarEjercicio.disabled = rutina === "";
-
-            if (rutina === "") {
-                return;
-            }
-
-            // Usamos el nombre como clave, con un prefijo.
-            const clave = "rutina:" + rutina;
-
-            const ejercicios =
-                datosGimnasio.ejerciciosPorRutina[clave] || [];
-
-            for (const nombre of ejercicios) {
-                const elemento = document.createElement("li");
-                elemento.textContent = nombre;
-                listaEjerciciosRutina.appendChild(elemento);
-            }
-
-            if (ejercicios.length === 0) {
-                mensajeEjercicios.textContent =
-                    "Esta rutina todavía no tiene ejercicios.";
-            }
-        }
+        function mostrarEjerciciosDeRutina() { RutinasGimnasio.editor(); }
 
         selectorRutinaEditar.addEventListener("change", function () {
             campoNuevoEjercicio.value = "";
@@ -1018,7 +972,7 @@
             const ejercicios = datosGimnasio.ejerciciosPorRutina[clave];
 
             const existe = ejercicios.some(function (ejercicio) {
-                return ejercicio.toLowerCase() === nombre.toLowerCase();
+                return (typeof ejercicio === 'string' ? ejercicio : ejercicio.nombre).toLowerCase() === nombre.toLowerCase();
             });
 
             if (existe) {

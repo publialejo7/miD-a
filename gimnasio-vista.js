@@ -3,7 +3,6 @@ const VistaGimnasio = (() => {
     const $ = id => document.getElementById(id);
     const G = GimnasioMiDia;
     const texto = (tag, contenido, clase) => {const el=document.createElement(tag); el.textContent=contenido; if(clase)el.className=clase; return el;};
-    const boton = (contenido, accion) => {const b=texto('button',contenido);b.type='button';b.addEventListener('click',accion);return b;};
     let ultimoResumen=null;
     function guardar() {
         const ok=guardarDatosGimnasio();
@@ -13,13 +12,6 @@ const VistaGimnasio = (() => {
     function cambiar(accion, pintar=true) {
         try {accion();guardar();if(pintar)mostrar();} catch(error) {$('mensaje-rutina-dia').textContent=error.message;}
     }
-    function campo(label, valor, tipo, cambio) {
-        const l=texto('label',label.split(' · ')[0]), input=document.createElement('input');
-        input.type=tipo;input.value=valor;input.inputMode=tipo==='number'?'decimal':'text';
-        input.setAttribute('aria-label',label);l.append(input);
-        input.addEventListener('input',()=>cambio(input.value));
-        return {l,input};
-    }
     function empezar(rutina) {
         cambiar(()=>{G.iniciar(datosGimnasio,claveFecha(fechaSeleccionada),claveFecha(new Date()),rutina);ultimoResumen=null;});
     }
@@ -27,12 +19,15 @@ const VistaGimnasio = (() => {
         const activo=datosGimnasio.activo;
         const fecha=claveFecha(fechaSeleccionada);
         $('gym-inicio').hidden=!!activo;
+        $('gestionar-rutinas-gimnasio').hidden=!!activo;
+        $('gym-titulo').textContent=activo?'Entrenamiento':'Gimnasio';
         $('gym-sesion').hidden=!activo;
         $('gym-resumen-final').hidden=!ultimoResumen || !!activo;
         selectorRutina.replaceChildren();
         const vacia=texto('option','Selecciona una rutina');vacia.value='';selectorRutina.append(vacia);
         for(const nombre of datosGimnasio.rutinas){const op=texto('option',nombre);op.value=nombre;selectorRutina.append(op);}
         selectorRutina.disabled=!datosGimnasio.rutinas.length;
+        RutinasGimnasio.tarjetas($('gym-rutinas'));
         const historico=datosGimnasio.entrenamientos[fecha];
         $('gym-historial-dia').hidden=!historico;
         $('gym-historial-dia').replaceChildren();
@@ -42,38 +37,19 @@ const VistaGimnasio = (() => {
         }
         const lista=$('lista-ejercicios');lista.replaceChildren();
         if(!activo){actualizarReloj();return;}
-        $('gym-sesion-nombre').textContent=activo.rutina+' · '+activo.fecha;
+        $('gym-sesion-nombre').textContent=activo.rutina;
         $('gym-auto-descanso').checked=activo.autoDescanso;
         $('gym-sonido').checked=activo.sonido;
         $('gym-descanso-default').value=activo.descansoPredeterminado;
         $('gym-fecha-aviso').textContent=activo.fecha!==fecha ? 'Continúas la sesión abierta del '+activo.fecha+'. La fecha del calendario no cambia su registro.' : activo.inicio===null ? 'Registro de un día pasado: sin duración de entrenamiento.' : '';
-        activo.ejercicios.forEach((e,ei)=>{
-            const bloque=texto('article','', 'ejercicio-dia gym-ejercicio');
-            bloque.append(texto('h3',e.nombre+(e.variante?' · '+e.variante:'')));
-            const ref=G.anterior(datosGimnasio,e.nombre,e.variante,activo.fecha);
-            const descanso=campo('Descanso (segundos) · '+e.nombre,e.descanso,'number',v=>{
-                if(Number.isInteger(Number(v)) && Number(v)>=0 && Number(v)<=3600 && v!==''){e.descanso=Number(v);guardar();}
-            });descanso.input.min='0';descanso.input.max='3600';descanso.input.step='1';
-            descanso.input.addEventListener('change',()=>{if(descanso.input.value==='' || !Number.isInteger(Number(descanso.input.value)) || Number(descanso.input.value)<0 || Number(descanso.input.value)>3600){descanso.input.value=e.descanso;$('mensaje-rutina-dia').textContent='El descanso debe ser de 0 a 3600 segundos enteros.';}});
-            bloque.append(descanso.l);
-            e.series.forEach((s,si)=>{
-                const fila=texto('div','', 'fila-serie gym-serie'+(G.completada(s)?' realizada':''));
-                fila.append(texto('strong','Serie '+(si+1)));
-                const anterior=ref?.series[si];
-                fila.append(texto('small',anterior?'Anterior ('+ref.fecha+'): '+anterior.peso+' kg × '+anterior.repeticiones:'Sin referencia para esta serie.','gym-referencia'));
-                const aviso=texto('p','','gym-error');aviso.hidden=true;aviso.setAttribute('role','status');
-                let completar;
-                const actualizar=()=>{completar.setAttribute('aria-label',(G.completada(s)?'Desmarcar':'Completar')+' serie '+(si+1)+' de '+e.nombre);completar.textContent=G.completada(s)?'✓ Completada':'○ Marcar completada';completar.setAttribute('aria-pressed',String(G.completada(s)));fila.className='fila-serie gym-serie'+(G.completada(s)?' realizada':'');};
-                const peso=campo('Peso (kg) · '+e.nombre+' · serie '+(si+1),s.peso,'number',v=>{s.peso=v;s.completada=false;guardar();actualizar();});peso.input.min='0';peso.input.step='any';
-                const reps=campo('Repeticiones · '+e.nombre+' · serie '+(si+1),s.repeticiones,'number',v=>{s.repeticiones=v;s.completada=false;guardar();actualizar();});reps.input.min='1';reps.input.step='1';reps.input.inputMode='numeric';
-                completar=boton('',()=>{try{G.confirmar(activo,e,s,!G.completada(s));aviso.hidden=true;guardar();actualizar();actualizarReloj();}catch(error){aviso.textContent=error.message;aviso.hidden=false;$('mensaje-rutina-dia').textContent=error.message;}});
-                completar.className='gym-completar';actualizar();
-                const quitar=boton('Quitar serie',()=>{if((G.completada(s) || s.peso!=='' || s.repeticiones!=='') && !confirm('¿Eliminar esta serie y sus datos?'))return;cambiar(()=>e.series.splice(si,1));});quitar.className='boton-discreto';
-                quitar.setAttribute('aria-label','Quitar serie '+(si+1)+' de '+e.nombre);
-                fila.append(peso.l,reps.l,completar,quitar,aviso);bloque.append(fila);
-            });
-            bloque.append(boton('+ Añadir serie',()=>cambiar(()=>{const ultima=e.series.at(-1);e.series.push({peso:ultima?.peso ?? '',repeticiones:ultima?.repeticiones ?? '',completada:false});})));
-            lista.append(bloque);
+        activo.ejercicios.forEach((e,i)=>{
+            const U=EditorGimnasio;
+            const proteger=accion=>{if(e.series.some(G.completada) && !confirm('Este ejercicio tiene series completadas. ¿Reemplazarlo o quitarlo y eliminar sus datos de esta sesión?'))return;accion();};
+            lista.append(U.ejercicio(e,{activo,fecha:activo.fecha,indice:i,total:activo.ejercicios.length,guardar,repintar:mostrar,
+                mover:paso=>cambiar(()=>G.mover(activo.ejercicios,i,paso)),
+                reemplazar:()=>proteger(()=>U.abrirCatalogo(nuevo=>cambiar(()=>{activo.ejercicios[i]=G.desdePlantilla(datosGimnasio,nuevo,activo.fecha);}))),
+                quitar:()=>proteger(()=>cambiar(()=>activo.ejercicios.splice(i,1)))
+            }));
         });
         actualizarReloj();
     }
@@ -85,8 +61,9 @@ const VistaGimnasio = (() => {
         $('gym-descanso-panel').hidden=!a?.descanso;
         if(!a){$('gym-tiempo').textContent='';return;}
         const conteo=G.conteo(a);
-        const transcurrido=a.inicio===null ? 'Sin duración' : Math.floor(Math.max(0,Date.now()-a.inicio)/60000)+' min';
-        $('gym-tiempo').textContent=transcurrido+' · '+conteo.completas+' completadas · '+conteo.pendientes+' pendientes'+(a.descanso ? ' · Descanso: '+Math.max(0,Math.ceil((a.descanso.fin-Date.now())/1000))+' s' : '');
+        const transcurrido=a.inicio===null ? 'Sin duración' : Math.floor(Math.max(0,Date.now()-a.inicio)/60000)+':'+String(Math.floor(Math.max(0,Date.now()-a.inicio)/1000)%60).padStart(2,'0');
+        $('gym-reloj-total').textContent=transcurrido;
+        $('gym-tiempo').textContent=conteo.completas+' hechas · '+conteo.pendientes+' pendientes'+(a.descanso ? ' · Descanso: '+Math.max(0,Math.ceil((a.descanso.fin-Date.now())/1000))+' s' : '');
         if(a.descanso){
             const restante=Math.max(0,Math.ceil((a.descanso.fin-Date.now())/1000));
             $('gym-descanso-tiempo').textContent=restante ? Math.floor(restante/60)+':'+String(restante%60).padStart(2,'0') : '✓ Descanso terminado';
@@ -99,6 +76,7 @@ const VistaGimnasio = (() => {
             }
         }
     }
+    $('gym-abrir-catalogo').addEventListener('click',()=>EditorGimnasio.abrirCatalogo(e=>cambiar(()=>{const a=datosGimnasio.activo;if(a)a.ejercicios.push(G.desdePlantilla(datosGimnasio,e,a.fecha));})));
     $('gym-empezar').addEventListener('click',()=>{if(!selectorRutina.value){$('mensaje-rutina-dia').textContent='Selecciona una rutina o empieza un entrenamiento vacío.';return;}empezar(selectorRutina.value);});
     $('gym-entrenamiento-vacio').addEventListener('click',()=>empezar(''));
     $('gym-reintentar').addEventListener('click',guardar);
@@ -124,5 +102,5 @@ const VistaGimnasio = (() => {
     });
     // La sincronización vuelve a invocar mostrar cuando incorpora cambios remotos.
     setInterval(actualizarReloj,1000);
-    return {mostrar,actualizarReloj};
+    return {mostrar,actualizarReloj,empezar};
 })();

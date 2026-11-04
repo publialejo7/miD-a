@@ -14,6 +14,10 @@ const SyncMiDia = (() => {
         const [anio,mes,dia]=valor.split('-').map(Number), fecha=new Date(anio,mes-1,dia,12);
         return anio>=1000 && fecha.getFullYear()===anio && fecha.getMonth()===mes-1 && fecha.getDate()===dia;
     }
+    function validarPlantilla(e) {
+        if(typeof e==='string')return true;
+        return !!e && typeof e.nombre==='string' && !!e.nombre.trim() && typeof e.variante==='string' && Number.isInteger(e.descanso) && e.descanso>=0 && e.descanso<=3600 && Array.isArray(e.series) && e.series.every(s=>s && ['normal','calentamiento','fallo','descendente'].includes(s.tipo) && ['string','number'].includes(typeof s.peso) && ['string','number'].includes(typeof s.repeticiones));
+    }
     function validar(datos) {
         if (!datos || datos.version !== 1) throw new Error('Versión de datos de la nube no compatible.');
         for (const grupo of grupos) {
@@ -22,7 +26,7 @@ const SyncMiDia = (() => {
                 if (!valor || typeof valor !== 'object' || Array.isArray(valor)) throw new Error('Registro de la nube no válido.');
                 if (grupo === 'study' && (!fechaValida(valor.fecha) || typeof valor.materia !== 'string' || !Number.isFinite(valor.duracion) || valor.duracion < 0 || (valor.id && valor.id!==id))) throw new Error('Sesión de estudio no válida.');
                 if (grupo === 'tasks' && (valor.id!==id || typeof valor.titulo !== 'string' || !valor.titulo.trim() || valor.titulo.length>160 || !fechaValida(valor.fecha) || !['tarea','examen','recordatorio'].includes(valor.tipo) || typeof valor.terminada !== 'boolean' || !Number.isFinite(valor.creada) || typeof valor.notas!=='string' || valor.notas.length>600)) throw new Error('Tarea de la nube no válida.');
-                if (grupo === 'routines' && (valor.nombre!==id || !valor.nombre || !Array.isArray(valor.ejercicios) || !valor.ejercicios.every(e => typeof e === 'string'))) throw new Error('Rutina de la nube no válida.');
+                if (grupo === 'routines' && (valor.nombre!==id || !valor.nombre || !Array.isArray(valor.ejercicios) || !valor.ejercicios.every(validarPlantilla))) throw new Error('Rutina de la nube no válida.');
                 if (grupo === 'workouts' && id === '@active') {
                     const a=valor.entrenamiento;
                     const segundos=v=>Number.isInteger(v) && v>=0 && v<=3600;

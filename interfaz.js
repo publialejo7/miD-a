@@ -37,7 +37,9 @@
         const hoy = new Date();
         texto('fecha-hoy', hoy.toLocaleDateString('es-ES', {weekday: 'long', day: 'numeric', month: 'long'}));
         texto('estudio-hoy', tiempoLegible(obtenerTiempoDelDia(hoy)));
-        texto('gimnasio-hoy', obtenerResumenGimnasio(hoy) || 'Sin registrar');
+        const entrenamientoHoy=datosGimnasio.entrenamientos[claveFecha(hoy)];
+        const seriesHoy=(entrenamientoHoy?.ejercicios || []).reduce((n,e)=>n+e.series.filter(GimnasioMiDia.completada).length,0);
+        texto('gimnasio-hoy',seriesHoy ? seriesHoy+(seriesHoy===1?' serie':' series') : 'Sin registrar');
         if (fechaSeleccionada) {
             texto('estudio-dia', tiempoLegible(obtenerTiempoDelDia(fechaSeleccionada)));
             texto('gimnasio-dia', obtenerResumenGimnasio(fechaSeleccionada) || 'Sin registrar');
@@ -118,6 +120,7 @@
 
     porId('nav-inicio').addEventListener('click', irAlCalendario);
     porId('nav-gimnasio').addEventListener('click', () => abrirResumen('gym'));
+    porId('panorama-agenda').addEventListener('click',()=>{periodos.agenda.referencia=new Date();abrirResumen('agenda');});
     porId('nav-agenda').addEventListener('click', () => abrirResumen('agenda'));
     porId('nav-productividad').addEventListener('click', () => abrirResumen('prod'));
     porId('nav-pomodoro').addEventListener('click', () => abrirEstudio('pomodoro', 'pomodoro'));
@@ -190,10 +193,12 @@
             evento.stopImmediatePropagation();
         }
     }, true);
+    porId('gym-continuar-resumen').addEventListener('click',()=>porId('gym-continuar').click());
     porId('registrar-gimnasio').addEventListener('click', () => abrirActividad(new Date(), 'abrir-gimnasio', 'resumen'));
     porId('registrar-productividad').addEventListener('click', () => abrirEstudio('libre', 'resumen'));
     porId('pomodoro-resumen').addEventListener('click', () => abrirEstudio('pomodoro', 'resumen'));
     porId('rutinas-resumen').addEventListener('click', () => {
+        fechaSeleccionada = new Date();
         volverAlGimnasio = false;
         rutinasDesdeResumen = true;
         mostrarRutinas();
@@ -375,6 +380,7 @@
         const hoy = claveFecha(new Date());
         const pasadas = pendientes.filter(tarea => tarea.fecha < hoy).length;
         const deHoy = pendientes.filter(tarea => tarea.fecha === hoy).length;
+        texto('agenda-hoy', deHoy ? deHoy+(deHoy===1?' pendiente':' pendientes') : 'Sin pendientes');
         texto('resumen-agenda-inicio', deHoy + ' para hoy' + (pasadas ? ' · ' + pasadas + ' con fecha pasada' : '') + ' · ' + pendientes.length + ' pendientes en total');
         const prioridad = tarea => tarea.fecha === hoy ? 0 : tarea.fecha < hoy ? 1 : 2;
         pintarTareas('proximas-tareas', pendientes.slice().sort((a, b) => prioridad(a) - prioridad(b) || a.fecha.localeCompare(b.fecha)).slice(0, 3));
@@ -394,6 +400,11 @@
     }
 
     function pintarResumen(prefijo) {
+        if(prefijo === 'gym') {
+            const firmaRutinas=JSON.stringify([datosGimnasio.rutinas,datosGimnasio.ejerciciosPorRutina,datosGimnasio.activo?.id]);
+            if(ultimoDibujo.rutinas!==firmaRutinas){RutinasGimnasio.tarjetas(porId('gym-rutinas-resumen'));ultimoDibujo.rutinas=firmaRutinas;}
+            porId('gym-continuar-resumen').hidden=!datosGimnasio.activo;
+        }
         const seleccion = periodos[prefijo];
         const rango = ResumenesMiDia.periodo(seleccion.tipo, seleccion.referencia);
         const esEstudio = prefijo === 'prod';
@@ -528,6 +539,7 @@
         porId('volver-de-rutinas').textContent = '‹ Volver al entrenamiento';
     });
     porId('abrir-rutinas').addEventListener('click', () => {
+        fechaSeleccionada = new Date();
         volverAlGimnasio = false;
         rutinasDesdeResumen = false;
         porId('volver-de-rutinas').textContent = '‹ Volver al calendario';
@@ -573,7 +585,7 @@
 
     function actualizarAccesoSesion() {
         const s = sesionActiva;
-        texto('estudiar-hoy', s ? 'Volver a mi estudio ↗' : 'Estudiar hoy ↗');
+        texto('estudio-accion-hoy', s ? 'Continuar ↗' : 'Estudiar ↗');
         const visible = !!s && porId('pantalla-productividad').hidden;
         if (porId('acceso-sesion').hidden === visible) porId('acceso-sesion').hidden = !visible;
         if (s) {

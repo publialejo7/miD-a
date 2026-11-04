@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#1b1b19">
+    <meta name="theme-color" content="#f5f5f7">
     <meta name="description" content="Tu agenda, estudio y entrenamiento, a tu ritmo. Disponible sin conexión después de la primera visita.">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,6 +14,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
     <title>Mi día</title>
     <link rel="stylesheet" href="estilos.css">
+    <link rel="stylesheet" href="brisa.css">
 </head>
 <body id="app">
     <header class="cabecera-app">
@@ -39,21 +40,19 @@
             <button id="siguiente" aria-label="Día siguiente">›</button>
         </div>
         <div id="carrusel"></div>
+        <div class="panorama-hoy" aria-label="Tu actividad de hoy">
+            <button id="panorama-agenda" aria-label="Ver la agenda de hoy"><svg class="brisa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="4"/><path d="M8 3v4m8-4v4M4 10h16m-11 5h1m4 0h1"/></svg><span>Agenda</span><strong id="agenda-hoy">Sin pendientes</strong><small>Organizar <span aria-hidden="true">↗</span></small></button>
+            <button id="estudiar-hoy" aria-label="Abrir el estudio de hoy"><svg class="brisa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6c-3-2-6-2-9-1v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1Zm0 0v14"/></svg><span>Estudio</span><strong id="estudio-hoy">Sin registrar</strong><small id="estudio-accion-hoy">Estudiar <span aria-hidden="true">↗</span></small></button>
+            <button id="entrenar-hoy" aria-label="Abrir el entrenamiento de hoy"><svg class="brisa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 12h8M3 10v4m18-4v4"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/></svg><span>Gimnasio</span><strong id="gimnasio-hoy">Sin registrar</strong><small>Entrenar <span aria-hidden="true">↗</span></small></button>
+        </div>
+        <button id="gym-continuar" hidden></button>
         <div class="panel-resumen panel-agenda prioridades-inicio">
-            <div class="titulo-seccion"><h2>Lo que tienes por delante</h2><button id="abrir-agenda">Ver agenda →</button></div>
+            <div class="titulo-seccion"><h2>Por delante</h2><button id="abrir-agenda">Ver agenda <span aria-hidden="true">↗</span></button></div>
             <p id="resumen-agenda-inicio" class="ayuda-campo"></p>
             <p id="mensaje-tareas-inicio" role="status" class="mensaje-tareas"></p>
             <ul id="proximas-tareas" class="lista-tareas"></ul>
         </div>
-        <div class="accesos-hoy" aria-label="Accesos para hoy">
-            <button id="estudiar-hoy" class="accion-principal">Estudiar hoy <span aria-hidden="true">↗</span></button>
-            <button id="gym-continuar" hidden></button><button id="entrenar-hoy">Entrenar hoy <span aria-hidden="true">↗</span></button>
-        </div>
-        <div class="resumen-actividad" aria-label="Lo que ya has registrado hoy">
-            <div><span>Estudio de hoy</span><strong id="estudio-hoy">Sin registrar</strong></div>
-            <div><span>Entrenamiento de hoy</span><strong id="gimnasio-hoy">Sin registrar</strong></div>
-        </div>
-        <button id="abrir-rutinas"><span><strong>Mis rutinas</strong><small>Prepara tus próximos entrenamientos</small></span><span aria-hidden="true">→</span></button>
+        <button id="abrir-rutinas"><span><strong>Mis rutinas</strong><small>Preparar un entrenamiento</small></span><span aria-hidden="true">→</span></button>
     </section>
 
     <section id="pantalla-dia" hidden>
@@ -149,21 +148,21 @@
     <section id="pantalla-gimnasio" hidden>
         <button id="volver-del-gimnasio">‹ Volver al día</button>
 
-        <h1>Gimnasio</h1>
+        <h1 id="gym-titulo">Gimnasio</h1>
         <p id="fecha-gimnasio"></p>
 
-        <div id="gym-inicio"><label for="rutina-del-dia">Empezar desde una rutina</label>
+        <div id="gym-inicio"><h2>Elige tu entrenamiento</h2><ul id="gym-rutinas" class="gym-rutinas-grid"></ul><div hidden><label for="rutina-del-dia">Empezar desde una rutina</label>
 
         <select id="rutina-del-dia">
             <option value="">Selecciona una rutina</option>
         </select>
 
-        <div class="gym-acciones"><button id="gym-empezar">Empezar rutina</button><button id="gym-entrenamiento-vacio">Entrenamiento vacío</button></div></div>
+        <button id="gym-empezar">Empezar rutina</button></div><button id="gym-entrenamiento-vacio" class="gym-vacio-boton">+ Entrenamiento libre</button></div>
         <p id="mensaje-rutina-dia" role="status" aria-live="polite"></p>
         <button id="gym-reintentar" class="boton-discreto" hidden>Volver a guardar</button>
         <button id="gestionar-rutinas-gimnasio" class="boton-discreto">Gestionar mis rutinas →</button>
         <div id="gym-sesion" hidden>
-            <div class="gym-cabecera"><h2 id="gym-sesion-nombre"></h2><p id="gym-tiempo"></p></div>
+            <div class="gym-cabecera"><div><h2 id="gym-sesion-nombre"></h2><p id="gym-tiempo"></p></div><strong id="gym-reloj-total" role="timer">0:00</strong></div>
             <p id="gym-fecha-aviso" class="ayuda-campo"></p>
             <details class="gym-ajustes"><summary>Descanso y sonido</summary>
                 <label><input type="checkbox" id="gym-auto-descanso"> Iniciar descanso al completar una serie</label>
@@ -174,7 +173,7 @@
             <div id="gym-descanso-panel" class="gym-descanso" hidden><strong id="gym-descanso-tiempo" role="timer"></strong><button id="gym-mas-descanso">+30 s</button><button id="gym-saltar-descanso">Terminar descanso</button></div>
             <p class="ayuda-campo">Los valores propuestos quedan pendientes. Confirma cada serie al realizarla. Editar una serie la deja pendiente de nuevo.</p>
             <div id="lista-ejercicios"></div>
-            <div class="gym-nuevo"><h3>Añadir ejercicio a esta sesión</h3><label for="gym-nombre-ejercicio">Nombre exacto</label><input id="gym-nombre-ejercicio" type="text" maxlength="120" placeholder="Ej. Press banca"><label for="gym-variante">Variante (opcional)</label><input id="gym-variante" type="text" maxlength="120" placeholder="Ej. Mancuernas"><button id="gym-anadir-ejercicio">Añadir ejercicio</button></div>
+            <button id="gym-abrir-catalogo" class="gym-catalogo-boton">+ Elegir ejercicio</button><details class="gym-nuevo"><summary>Ejercicio personalizado</summary><label for="gym-nombre-ejercicio">Nombre exacto</label><input id="gym-nombre-ejercicio" type="text" maxlength="120" placeholder="Ej. Press banca"><label for="gym-variante">Variante (opcional)</label><input id="gym-variante" type="text" maxlength="120" placeholder="Ej. Mancuernas"><button id="gym-anadir-ejercicio">Añadir ejercicio</button></details>
             <div class="gym-acciones"><button id="gym-terminar" class="accion-principal">Terminar entrenamiento</button><button id="gym-descartar" class="boton-discreto">Descartar sesión</button></div>
         </div>
         <p id="gym-resumen-final" role="status" hidden></p>
@@ -186,7 +185,7 @@
         <button id="volver-de-rutinas">‹ Volver al calendario</button>
 
         <h1>Mis rutinas</h1>
-        <p>Añade las rutinas que quieras utilizar en tus entrenamientos.</p>
+        <p class="intro-resumen">Prepara tus series. Después, céntrate en entrenar.</p><details id="rutina-nueva" class="gym-crear"><summary>+ Nueva rutina</summary>
 
         <label for="nueva-rutina">Nombre de la rutina</label>
         <input
@@ -196,15 +195,15 @@
             placeholder="Ej. Pecho, hombro y tríceps"
         >
 
-        <button id="guardar-rutina">Añadir rutina</button>
+        <button id="guardar-rutina">Crear rutina</button></details>
 
-        <ul id="lista-rutinas"></ul>
+        <ul id="lista-rutinas" class="gym-rutinas-grid"></ul>
         <p id="mensaje-rutinas" role="status"></p>
 
-        <h2>Ejercicios de una rutina</h2>
+        <div hidden>
 
         <label for="rutina-a-editar">Selecciona la rutina</label>
-        <select id="rutina-a-editar"></select>
+        <select id="rutina-a-editar"></select></div><div id="rutina-editor" hidden><div class="gym-rutina-editor-cabecera"><h2 id="rutina-editor-nombre"></h2><button id="rutina-guardar-cambios" class="accion-principal">Guardar rutina</button></div><p class="ayuda-campo">Define tus objetivos y toca el número de una serie para cambiar su tipo: trabajo, calentamiento, al fallo o descendente.</p><button id="rutina-catalogo" class="gym-catalogo-boton">+ Elegir ejercicio</button><details class="gym-personalizado"><summary>Crear un ejercicio personalizado</summary>
 
         <label for="nuevo-ejercicio">Nombre del ejercicio</label>
         <input
@@ -214,16 +213,17 @@
             placeholder="Ej. Press banca"
         >
 
-        <button id="guardar-ejercicio">Añadir ejercicio</button>
+        <button id="guardar-ejercicio">Añadir ejercicio</button></details>
 
-        <ul id="ejercicios-rutina"></ul>
-        <p id="mensaje-ejercicios" role="status"></p>
+        <div id="ejercicios-rutina"></div>
+        <p id="mensaje-ejercicios" role="status"></p></div>
     </section>
     <section id="pantalla-resumen-gimnasio" hidden>
         <p class="antetitulo">TU ENTRENAMIENTO</p>
         <h1>Gimnasio</h1>
-        <p class="intro-resumen">Una vista de tu constancia, serie a serie.</p>
-        <div class="acciones-resumen"><button id="registrar-gimnasio" class="accion-principal">Registrar entrenamiento de hoy ↗</button><button id="rutinas-resumen">Mis rutinas</button></div>
+        <p class="intro-resumen">Tus rutinas, listas para entrenar.</p><button id="gym-continuar-resumen" hidden class="gym-catalogo-boton">Continuar entrenamiento →</button>
+        <div class="acciones-resumen gym-acciones-portada"><button id="registrar-gimnasio">+ Entrenar hoy</button><button id="rutinas-resumen">Mis rutinas <span aria-hidden="true">↗</span></button></div><h2 class="gym-seccion-titulo">Listas para empezar</h2><ul id="gym-rutinas-resumen" class="gym-rutinas-grid"></ul>
+        <h2 class="gym-seccion-titulo">Tu constancia</h2>
         <div class="selector-periodo" role="group" aria-label="Periodo del resumen de gimnasio">
             <button id="gym-semana" aria-pressed="true">Semana</button><button id="gym-mes" aria-pressed="false">Mes</button>
         </div>
@@ -330,12 +330,22 @@
         </form>
     </dialog>
 
+    <dialog id="gym-catalogo" class="gym-dialog" aria-labelledby="catalogo-titulo">
+        <div class="gym-dialog-cabecera"><div><p class="antetitulo">TU BIBLIOTECA</p><h2 id="catalogo-titulo">Elige un ejercicio</h2></div><button id="catalogo-cerrar" aria-label="Cerrar catálogo">×</button></div>
+        <label class="solo-lectores" for="catalogo-buscar">Buscar ejercicio o variante</label><input id="catalogo-buscar" type="search" placeholder="Busca un ejercicio o agarre…" autocomplete="off">
+        <div class="catalogo-filtros"><select id="catalogo-musculo" aria-label="Filtrar por grupo muscular"></select><select id="catalogo-equipo" aria-label="Filtrar por material"></select></div>
+        <p id="catalogo-cantidad" class="ayuda-campo" role="status"></p><div id="catalogo-resultados"></div>
+        <details class="gym-personalizado"><summary>Crear mi propio ejercicio</summary><label for="catalogo-nombre-propio">Nombre</label><input id="catalogo-nombre-propio" maxlength="100"><label for="catalogo-variante-propia">Variante o agarre</label><input id="catalogo-variante-propia" maxlength="100"><button id="catalogo-personalizado">Añadir mi ejercicio</button><p id="catalogo-estado" role="status"></p></details>
+    </dialog>
     <script src="config-sync.js"></script>
     <script src="datos-locales.js"></script>
     <script src="tareas.js"></script>
+    <script src="gimnasio-catalogo.js"></script>
     <script src="gimnasio-core.js"></script>
     <script src="app.js"></script>
+    <script src="gimnasio-editor.js"></script>
     <script src="gimnasio-vista.js"></script>
+    <script src="gimnasio-rutinas.js"></script>
     <script src="resumenes.js"></script>
     <script src="interfaz.js"></script>
     <script src="pwa.js"></script>

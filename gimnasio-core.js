@@ -23,13 +23,37 @@ const GimnasioMiDia = (() => {
         const ref = anterior(datos,nombre,variante,fecha);
         return {id:id(),nombre,variante:variante || '',descanso,series:ref ? ref.series.map(s => ({peso:s?.peso ?? '',repeticiones:s?.repeticiones ?? '',completada:false})) : [{peso:'',repeticiones:'',completada:false}]};
     }
+    const tipos = ['normal','calentamiento','fallo','descendente'];
+    function plantilla(entrada) {
+        if (typeof entrada === 'string') return {id:id(),nombre:entrada,variante:'',descanso:90,series:[{tipo:'normal',peso:'',repeticiones:''}]};
+        return copia(entrada);
+    }
+    function validarPlan(entrada) {
+        if(typeof entrada==='string')return;
+        for(const s of entrada.series){
+            if((String(s.peso).trim()!=='' && (!Number.isFinite(Number(s.peso)) || Number(s.peso)<0)) ||
+                (String(s.repeticiones).trim()!=='' && (!Number.isInteger(Number(s.repeticiones)) || Number(s.repeticiones)<=0)))
+                throw new Error('Revisa '+entrada.nombre+': peso de 0 kg o más y repeticiones enteras mayores que 0.');
+        }
+    }
+    function desdePlantilla(datos, entrada, fecha) {
+        validarPlan(entrada);
+        if (typeof entrada === 'string') return ejercicio(datos,entrada,'',fecha,90);
+        const p=plantilla(entrada);
+        return {...p,id:id(),series:p.series.map(s=>({...s,completada:false,sugerida:true}))};
+    }
+    function mover(lista, indice, desplazamiento) {
+        const destino=indice+desplazamiento;
+        if(destino<0 || destino>=lista.length)return;
+        [lista[indice],lista[destino]]=[lista[destino],lista[indice]];
+    }
     function iniciar(datos, fecha, hoy, rutina, ahora = Date.now()) {
         if (datos.activo) return datos.activo;
         if (fecha > hoy) throw new Error('Elige hoy o una fecha anterior para registrar un entrenamiento.');
         const nombres = datos.ejerciciosPorRutina['rutina:' + rutina] || [];
         datos.activo = {id:id(),fecha,rutina:rutina || 'Entrenamiento libre',origen:rutina || null,
             inicio:fecha === hoy ? ahora : null,autoDescanso:true,descansoPredeterminado:90,sonido:false,descanso:null,
-            ejercicios:nombres.map(n => ejercicio(datos,n,'',fecha,90))};
+            ejercicios:nombres.map(n => desdePlantilla(datos,n,fecha))};
         return datos.activo;
     }
     function confirmar(activo, ejercicio, serie, valor, ahora = Date.now()) {
@@ -59,6 +83,6 @@ const GimnasioMiDia = (() => {
         delete datos.activo;
         return resumen;
     }
-    return {copia,valida,completada,anterior,ejercicio,iniciar,confirmar,conteo,finalizar};
+    return {copia,valida,completada,anterior,ejercicio,iniciar,confirmar,conteo,finalizar,plantilla,desdePlantilla,mover,tipos,id,validarPlan};
 })();
 if (typeof module !== 'undefined') module.exports = GimnasioMiDia;
